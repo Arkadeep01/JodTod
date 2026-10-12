@@ -32,7 +32,7 @@ Evidence-based verification of every endpoint in `endpoint_inventory.json`. Stat
 | EP-007 | POST | `/api/auth/verify-email` | None | **BLOCKED** | No dev_code; blocked on EP-006 / real SMTP. |
 | EP-008 | POST | `/api/auth/forgot-password` | 502 | **BLOCKED** | Mock EMAIL_PROVIDER reports accepted=False by design; no dev_code. Positive run needs real SMTP creds. |
 | EP-009 | POST | `/api/auth/reset-password` | None | **BLOCKED** | No dev_code; blocked on EP-008 / real SMTP. |
-| EP-010 | POST | `/api/auth/refresh` | 200 | **PASS** | {"access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOWM3NDg1MC1mZDQ4LTVmYjMtOTBkZS1hMmZmOTc0YWRhNDYiLCJzaWQiOiI0MTZmMTg0Mi1jM2RmLTQ3MmMtODY1Mi... |
+| EP-010 | POST | `/api/auth/refresh` | 200 | **PASS** | {"access_token": "[REDACTED-TEST-TOKEN]", ...} |
 | EP-011 | POST | `/api/auth/google` | 401 | **BLOCKED** | Requires a real provider-issued ID token + JWKS/audience config; dummy token correctly rejected (fail-closed). |
 | EP-012 | POST | `/api/auth/apple` | 503 | **BLOCKED** | Requires a real provider-issued ID token + JWKS/audience config; dummy token correctly rejected (fail-closed). |
 | EP-013 | GET | `/api/users/me` | 200 | **PASS** | {"user": {"name": "Arkadeep", "email": "arkadeep@admin.com", "phone": "+919000000005", "id": "d9c74850-fd48-5fb3-90de-a2ff974ada46", "username": "arkadeep", ... |

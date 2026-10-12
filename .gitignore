@@ -14,7 +14,36 @@ Thumbs.db
 
 # Local backend run logs (uvicorn stdout/stderr redirects; never commit).
 backend-local*.log
+*.log
 
 # Python / TypeScript build caches at root level.
 __pycache__/
+*.pyc
+*.pyo
 *.tsbuildinfo
+
+# Python virtualenvs.
+.venv/
+venv/
+ENV/
+
+# Pytest / coverage caches.
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# Local database artifacts — never commit dumps or local-only files.
+*.sql
+*.dump
+*.bak
+*.sqlite
+*.sqlite3
+*.db
+pgdata/
+data/
+
+# Uploaded user content (served from backend/uploads/ at runtime; never commit).
+backend/uploads/
+
+# Local Docker volume state is in the container/volume, not the repo.

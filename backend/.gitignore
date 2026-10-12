@@ -36,6 +36,32 @@ yarn-error.*
 .env.*
 !.env.example
 
+# python virtualenvs
+.venv/
+venv/
+ENV/
+
+# python caches
+__pycache__/
+*.pyc
+*.pyo
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# local database artifacts — never commit dumps or local-only files
+*.sql
+*.dump
+*.bak
+*.sqlite
+*.sqlite3
+*.db
+
+# uploaded user content (runtime storage; never commit)
+uploads/
+
 # typescript
 *.tsbuildinfo
 

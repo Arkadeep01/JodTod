@@ -25,6 +25,7 @@ from backend.models.user_preference import UserPreference
 from backend.models.faq import Faq
 from backend.models.support_request import SupportRequest
 from backend.models.group_invitation import GroupInvitation
+from backend.models.notification import Notification
 from backend.models.session import Session
 from backend.models.otp import OTP
 from backend.models.email_verification import EmailVerification

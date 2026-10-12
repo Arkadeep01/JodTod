@@ -134,7 +134,7 @@
       "status": "PASS",
       "expected": "200",
       "http_status": 200,
-      "observed": "{\"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOWM3NDg1MC1mZDQ4LTVmYjMtOTBkZS1hMmZmOTc0YWRhNDYiLCJzaWQiOiI0MTZmMTg0Mi1jM2RmLTQ3MmMtODY1Mi05NTJjMDBmYWMxMDIiLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzkxNjU3NDEyLCJleHAiOjE3OTE2NTgzM...",
+      "observed": "{\"access_token\": \"[REDACTED-TEST-TOKEN]\", \"token_type\": \"bearer\"}",
       "scenario": "rotate arkadeep refresh token",
       "db_effect": "updates sessions refresh hash"
     },

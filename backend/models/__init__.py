@@ -21,6 +21,7 @@ from .user_preference import UserPreference
 from .faq import Faq
 from .support_request import SupportRequest
 from .group_invitation import GroupInvitation
+from .notification import Notification, NotificationType
 from .session import Session
 from .otp import OTP
 from .email_verification import EmailVerification
@@ -46,6 +47,8 @@ __all__ = [
     "Faq",
     "SupportRequest",
     "GroupInvitation",
+    "Notification",
+    "NotificationType",
     "Session",
     "OTP",
     "EmailVerification",

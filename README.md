@@ -112,13 +112,13 @@ pip install -r requirements.txt
 Windows:
 
 ```powershell
-copy .env.example backend\.env
+copy backend\.env.example backend\.env
 ```
 
 macOS:
 
 ```bash
-cp .env.example backend/.env
+cp backend/.env.example backend/.env
 ```
 
 Then open `backend/.env` and fill in at least:
