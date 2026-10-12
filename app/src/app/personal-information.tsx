@@ -219,7 +219,7 @@ export default function PersonalInformation() {
     <SafeAreaView edges={["top", "bottom"]} className="flex-1 bg-[#F5F9FC]">
       {/* Background */}
       <Image
-        source={require("../../assets/images/jodtod/background_animation.png")}
+        source={require("../../assets/images/jodtod/background_home.png")}
         resizeMode="cover"
         className="absolute inset-0 h-full w-full"
       />

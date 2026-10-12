@@ -48,8 +48,10 @@ import { Platform } from "react-native";
 const REDIRECT_PATH = "oauth";
 
 type ExtraConfig = {
-  googleWebClientId?: string | null;
-  googleAndroidClientId?: string | null;
+  // Typed unknown: Expo's config pipeline materializes null extra values
+  // as {} on device, so readers must never assume strings here.
+  googleWebClientId?: unknown;
+  googleAndroidClientId?: unknown;
 };
 
 export type GoogleOAuthEnvironment =
@@ -61,8 +63,9 @@ function extraConfig(): ExtraConfig {
   return (Constants.expoConfig?.extra ?? {}) as ExtraConfig;
 }
 
-function trimmed(value: string | null | undefined): string | undefined {
-  const next = (value ?? "").trim();
+function trimmed(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const next = value.trim();
   return next.length > 0 ? next : undefined;
 }
 

@@ -1,0 +1,48 @@
+{
+  "dataset": "jodtod-mock-v1",
+  "notes": "Expected outcomes for the seeded dataset. IDs for groups are looked up via GET /api/groups or the invite codes below.",
+  "invite_codes": {
+    "goa_trip": "GOA2026SEED",
+    "flat_rent": "FLAT12BSEED",
+    "food_mess": "MESSFUND01",
+    "hostel_old": "HOSTELOLD1"
+  },
+  "login_users": {
+    "avery": { "identifier": "avery@jodtod.test", "password_env": "JODTOD_SEED_PASSWORD" },
+    "rohan": { "identifier": "rohan@jodtod.test", "password_env": "JODTOD_SEED_PASSWORD" },
+    "priya": { "identifier": "priya@jodtod.test", "password_env": "JODTOD_SEED_PASSWORD" },
+    "guest": { "identifier": "guest@jodtod.test", "password_env": "JODTOD_SEED_PASSWORD" }
+  },
+  "expected": [
+    { "id": "EP-002", "when": "login as avery", "expect": { "status": 200, "user.email": "avery@jodtod.test", "user.google_linked": true, "tokens.access_token": "present" } },
+    { "id": "EP-002", "when": "login with wrong password", "expect": { "status": 401, "detail": "Invalid credentials." } },
+    { "id": "EP-013", "when": "GET /users/me as avery", "expect": { "status": 200, "user.username": "avery.sharma", "user.google_linked": true } },
+    { "id": "EP-041", "when": "GET /groups as avery", "expect": { "count": 2, "names": ["Goa Trip 2026", "Flat 12B Rent"], "flat_rent.you_are_owed": "8000.00" } },
+    { "id": "EP-041", "when": "GET /groups as rohan", "expect": { "count": 4, "names_include": ["Goa Trip 2026", "Flat 12B Rent", "Mess Food Fund", "Hostel Block C (closed)"] } },
+    { "id": "EP-041", "when": "GET /groups as priya", "expect": { "count": 3, "contains": ["Goa Trip 2026", "Mess Food Fund", "Hostel Block C (closed)"], "not_contains": ["Flat 12B Rent"] } },
+    { "id": "EP-043", "when": "GET /groups/{goa} as avery", "expect": { "status": 200, "member_count": 3, "my_net": "2400.00", "my_direction": "YOU_ARE_OWED" } },
+    { "id": "EP-043", "when": "GET /groups/{flat_rent} as priya", "expect": { "status": 404 } },
+    { "id": "EP-050", "when": "GET /groups/search/by-code?code=GOA2026SEED", "expect": { "status": 200, "name": "Goa Trip 2026" } },
+    { "id": "EP-049", "when": "GET /groups/{flat_rent}/suggestions as avery", "expect": { "suggestions": [ { "payer": "rohan", "receiver": "avery", "amount": "8000.00" } ] } },
+    { "id": "EP-052", "when": "GET /expenses?group_id={goa} as avery", "expect": { "total": 2, "titles": ["Scooter rental", "Beach shack dinner"] } },
+    { "id": "EP-033", "when": "GET /activities as avery", "expect": { "count": 4 } },
+    { "id": "EP-033", "when": "GET /activities as guest", "expect": { "count": 0 } },
+    { "id": "EP-036", "when": "GET /notifications as avery", "expect": { "count": 4 } },
+    { "id": "EP-039", "when": "GET /notifications/unread/count as avery", "expect": { "unread_count": 2 } },
+    { "id": "EP-039", "when": "GET /notifications/unread/count as rohan", "expect": { "unread_count": 1 } },
+    { "id": "EP-039", "when": "GET /notifications/unread/count as priya", "expect": { "unread_count": 2 } },
+    { "id": "EP-056", "when": "GET /settlements/pending-confirmations as avery", "expect": { "count": 1, "status": "pending", "amount": "500.00" } },
+    { "id": "EP-056", "when": "GET /settlements/pending-confirmations as rohan", "expect": { "count": 0 } },
+    { "id": "EP-053", "when": "GET /settlements/people as avery", "expect": { "contains": ["Rohan Mehta"], "rohan.net_balance": "8000.00" } },
+    { "id": "EP-026", "when": "GET /support/faqs", "expect": { "min_count": 3 } },
+    { "id": "EP-029", "when": "GET /invitations/mine as guest", "expect": { "count": 1, "group_name": "Goa Trip 2026" } },
+    { "id": "EP-028", "when": "GET /support/requests as avery", "expect": { "count": 2 } },
+    { "id": "EP-020", "when": "GET /users/me/preferences as avery", "expect": { "display_name": "username", "currency": "INR" } },
+    { "id": "EP-023", "when": "GET /users/me/linked-accounts as avery", "expect": { "google.connected": true, "apple.connected": false } },
+    { "id": "EP-023", "when": "GET /users/me/linked-accounts as priya", "expect": { "apple.connected": true, "google.connected": false } },
+    { "id": "EP-022", "when": "GET /users/me/notifications/counts as avery", "expect": { "expense_updates": 1, "settlement_reminders": 1, "group_invitations": 1 } },
+    { "id": "ANY-AUTH", "when": "any protected route without Authorization header", "expect": { "status": 403 } },
+    { "id": "EP-034", "when": "GET /activities/{avery_activity} as rohan", "expect": { "status": 404 } },
+    { "id": "EP-037", "when": "GET /notifications/{avery_notification} as rohan", "expect": { "status": 404 } }
+  ]
+}

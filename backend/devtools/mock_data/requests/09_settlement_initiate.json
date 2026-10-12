@@ -1,0 +1,8 @@
+{
+  "group_id": "${GROUP_ID}",
+  "receiver_user_id": "${RECEIVER_USER_ID}",
+  "amount": "250.00",
+  "payment_method": "marked_as_paid",
+  "note": "Initiated during verification.",
+  "idempotency_key": "verify-set-0001"
+}

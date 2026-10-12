@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, inr } from './ui';
@@ -23,8 +23,13 @@ export function groupExpensesByDate(expenses: Expense[]) {
 }
 
 export function ExpenseRow({ expense: e }: { expense: Expense }) {
+  // Static row: no expense-detail route exists anywhere (frontend has
+  // only the Activity internal detail keyed by activity id; the backend
+  // exposes expense create + list only), so this must not look tappable.
+  // Was a pressable with no handler. See report: wiring row taps needs
+  // a GET single-expense endpoint + detail screen (product decision).
   return (
-    <TouchableOpacity activeOpacity={0.8}>
+    <View>
       <View
         className="flex-row items-center justify-between rounded-2xl border border-white/50 px-4 py-3.5"
         style={{ backgroundColor: 'rgba(255,255,255,0.35)' }}
@@ -49,6 +54,6 @@ export function ExpenseRow({ expense: e }: { expense: Expense }) {
           {inr(e.amount)}
         </Text>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }

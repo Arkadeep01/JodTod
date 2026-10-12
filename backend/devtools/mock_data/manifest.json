@@ -1,0 +1,67 @@
+{
+  "dataset": "jodtod-mock-v1",
+  "description": "Deterministic multi-user mock dataset for local/dev verification of the JodTod backend.",
+  "id_scheme": {
+    "algorithm": "uuid5",
+    "namespace": "uuid.NAMESPACE_URL",
+    "name_template": "jodtod-seed:{entity}:{key}",
+    "note": "Every seeded row gets a stable UUID derived from its logical key, so re-running the seed updates the same rows (idempotent) and verification can address rows by key."
+  },
+  "counts": {
+    "users": 5,
+    "groups": 5,
+    "group_members": 12,
+    "expenses": 7,
+    "expense_splits": 17,
+    "settlements": 4,
+    "activities": 14,
+    "notifications": 12,
+    "preferences": 4,
+    "invitations": 4,
+    "support_requests": 3,
+    "faqs": 3
+  },
+  "users": [
+    { "key": "avery", "email": "avery@jodtod.test", "phone": "+919000000001", "status": "active", "linked": ["google"] },
+    { "key": "rohan", "email": "rohan@jodtod.test", "phone": "+919000000002", "status": "active", "linked": [] },
+    { "key": "priya", "email": "priya@jodtod.test", "phone": "+919000000003", "status": "active", "linked": ["apple"] },
+    { "key": "guest", "email": "guest@jodtod.test", "phone": "+919000000004", "status": "pending", "linked": [] },
+    { "key": "arkadeep", "email": "arkadeep@admin.com", "phone": "+919000000005", "status": "active", "linked": [], "password_env": "JODTOD_DEMO_ADMIN_PASSWORD", "note": "Local demo account. Password comes from JODTOD_DEMO_ADMIN_PASSWORD, not the shared seed password." }
+  ],
+  "isolation_matrix": {
+    "avery": ["goa_trip", "flat_rent"],
+    "rohan": ["goa_trip", "flat_rent", "food_mess", "hostel_old", "office_lunch"],
+    "priya": ["goa_trip", "food_mess", "hostel_old", "office_lunch"],
+    "guest": [],
+    "arkadeep": ["office_lunch"]
+  },
+  "expected_net_balances": {
+    "flat_rent": {
+      "avery": "8000.00",
+      "rohan": "-8000.00",
+      "note": "avery is owed 13000 from expenses, minus 5000 confirmed from rohan = 8000"
+    },
+    "goa_trip": {
+      "avery": "2400.00",
+      "rohan": "-450.00",
+      "priya": "-1950.00"
+    },
+    "food_mess": {
+      "priya": "450.00",
+      "rohan": "-450.00",
+      "note": "rohan's 300 rejected settlement does not change the balance"
+    },
+    "office_lunch": {
+      "arkadeep": "950.00",
+      "rohan": "0.00",
+      "priya": "-950.00",
+      "note": "expense-only net for rohan is -500 (owes 800 meal, is owed 300 coffee); the 500 confirmed settlement (rohan -> arkadeep) zeroes it"
+    }
+  },
+  "login": {
+    "password_env": "JODTOD_SEED_PASSWORD",
+    "identifier_field": "email",
+    "per_user_override": "A fixture user may set password_env to name its own env var (the arkadeep demo account uses JODTOD_DEMO_ADMIN_PASSWORD). Users without it share JODTOD_SEED_PASSWORD.",
+    "note": "The seed refuses to run without the applicable password(s); no plaintext password is committed. Email containing 'admin' grants no privilege: there is no global user role, only per-group MemberRole."
+  }
+}

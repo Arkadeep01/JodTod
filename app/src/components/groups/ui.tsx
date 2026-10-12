@@ -33,7 +33,7 @@ export const colors = {
   accentOrangeBg: '#FFF3DE',
 };
 
-const GROUP_BG_IMAGE = require('../../../assets/images/jodtod/background_onboarding.png');
+const GROUP_BG_IMAGE = require('../../../assets/images/jodtod/background_home.png');
 
 export const cardShadow = {
   shadowColor: '#0B3D62',
@@ -54,6 +54,9 @@ export const CARD_PADDING_H = 20;
 export function ScreenBackground() {
   return (
     <>
+      {/* Decorative art only: a bare Image never becomes the touch
+          responder, and the glow orbs below set pointerEvents="none",
+          so touches always reach the form cards above. */}
       <Image source={GROUP_BG_IMAGE} className="absolute inset-0 h-full w-full" resizeMode="cover" />
       {/* Soft glow orbs for depth — background artwork stays visible through the glass */}
       <View
@@ -440,7 +443,11 @@ export function LabeledField({
         style={{
           borderWidth: 1.5,
           borderColor: '#8FE3BB',
-          backgroundColor: 'rgba(255,255,255,0.08)',
+          // Nearly-opaque surface: the previous 8% white let the
+          // full-bleed photo artwork show through behind the text,
+          // destroying contrast. 78% keeps the glass feel while
+          // keeping labels/values readable.
+          backgroundColor: 'rgba(255,255,255,0.78)',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -466,7 +473,7 @@ export function LabeledField({
             className="flex-1 text-sm"
             style={{ color: colors.textDark, paddingVertical: multiline ? 14 : 0 }}
             placeholder={placeholder}
-            placeholderTextColor="rgba(20,33,43,0.4)"
+            placeholderTextColor="rgba(20,33,43,0.55)"
             value={value}
             onChangeText={onChangeText}
             autoCapitalize={autoCapitalize}

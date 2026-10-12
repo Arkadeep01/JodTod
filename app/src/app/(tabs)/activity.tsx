@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   View,
   Text,
@@ -58,7 +59,7 @@ const cardShadow = {
 
 const glassBg = { backgroundColor: "rgba(255,255,255,0.01)" };
 
-const BACKGROUND_IMAGE = require("../../../assets/images/jodtod/background_onboarding.png");
+const BACKGROUND_IMAGE = require("../../../assets/images/jodtod/background_home.png");
 
 /* ────────────────────────────────────────────────────────────────────────
    REUSABLE GLASS PIECES
@@ -2050,11 +2051,43 @@ export default function ActivityFlow() {
   const [appliedFilters, setAppliedFilters] = useState<ActivityFilters | null>(
     null,
   );
+  const params = useLocalSearchParams<{
+    activityId?: string | string[];
+    ts?: string | string[];
+  }>();
+  const deepLinkConsumedRef = useRef<string | null>(null);
 
   const push = (screen: Screen) => setStack((s) => [...s, screen]);
   const pop = () => setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
   const current = stack[stack.length - 1];
   const isMain = current.name === "main";
+
+  // Home recent-expense drill: open the expense detail directly.
+  // The detail screen fetches its own record by id (loading/error/retry
+  // included), so nothing is trusted from the link except the id.
+  // Focus-driven (not mount-only) so the detail opens whenever Home
+  // navigates here. The `ts` nonce is part of the consumed key so repeat
+  // taps on the same expense still open it; plain tab-bar visits carry
+  // no fresh nonce and leave the list untouched. Only pushes from the
+  // main list — never stacks duplicates over an open detail.
+  useFocusEffect(
+    useCallback(() => {
+      const rawId = params.activityId;
+      const rawTs = params.ts;
+      const id = Array.isArray(rawId) ? rawId[0] : rawId;
+      if (!id) return;
+      const ts = Array.isArray(rawTs) ? rawTs[0] : rawTs;
+      const key = `${id}:${ts ?? ""}`;
+      if (deepLinkConsumedRef.current === key) return;
+      deepLinkConsumedRef.current = key;
+      setStack((st) => {
+        if (st.length === 1 && st[0].name === "main") {
+          return [...st, { name: "expense", params: { id } }];
+        }
+        return st;
+      });
+    }, [params.activityId, params.ts]),
+  );
 
   // Android hardware Back mirrors the visible Detail Back button: pop the
   // internal stack when a detail is open, otherwise let the OS/router

@@ -1,0 +1,103 @@
+[
+  {
+    "key": "goa_dinner",
+    "group": "goa_trip",
+    "title": "Beach shack dinner",
+    "description": "Dinner at Curlies.",
+    "amount": "3600.00",
+    "currency": "INR",
+    "payer": "avery",
+    "expense_date_offset_days": -3,
+    "splits": [
+      { "user": "avery", "share": "1200.00" },
+      { "user": "rohan", "share": "1200.00" },
+      { "user": "priya", "share": "1200.00" }
+    ]
+  },
+  {
+    "key": "goa_scooter",
+    "group": "goa_trip",
+    "title": "Scooter rental",
+    "description": "Two scooters for two days.",
+    "amount": "1500.00",
+    "currency": "INR",
+    "payer": "rohan",
+    "expense_date_offset_days": -2,
+    "splits": [
+      { "user": "rohan", "share": "750.00" },
+      { "user": "priya", "share": "750.00" }
+    ]
+  },
+  {
+    "key": "flat_rent_feb",
+    "group": "flat_rent",
+    "title": "February rent",
+    "description": "Paid by bank transfer.",
+    "amount": "30000.00",
+    "currency": "INR",
+    "payer": "avery",
+    "expense_date_offset_days": -10,
+    "splits": [
+      { "user": "avery", "share": "15000.00" },
+      { "user": "rohan", "share": "15000.00" }
+    ]
+  },
+  {
+    "key": "flat_utility",
+    "group": "flat_rent",
+    "title": "Electricity + water",
+    "description": "Utility bill for the month.",
+    "amount": "4000.00",
+    "currency": "INR",
+    "payer": "rohan",
+    "expense_date_offset_days": -5,
+    "splits": [
+      { "user": "avery", "share": "2000.00" },
+      { "user": "rohan", "share": "2000.00" }
+    ]
+  },
+  {
+    "key": "food_groceries",
+    "group": "food_mess",
+    "title": "Groceries",
+    "description": "Weekly grocery run.",
+    "amount": "900.00",
+    "currency": "INR",
+    "payer": "priya",
+    "expense_date_offset_days": -1,
+    "splits": [
+      { "user": "rohan", "share": "450.00" },
+      { "user": "priya", "share": "450.00" }
+    ]
+  },
+  {
+    "key": "office_lunch_meal",
+    "group": "office_lunch",
+    "title": "Team lunch",
+    "description": "Lunch at the cafe.",
+    "amount": "2400.00",
+    "currency": "INR",
+    "payer": "arkadeep",
+    "expense_date_offset_days": -1,
+    "splits": [
+      { "user": "arkadeep", "share": "800.00" },
+      { "user": "rohan", "share": "800.00" },
+      { "user": "priya", "share": "800.00" }
+    ]
+  },
+  {
+    "key": "office_lunch_coffee",
+    "group": "office_lunch",
+    "title": "Coffee run",
+    "description": "Afternoon coffee for the team.",
+    "amount": "450.00",
+    "currency": "INR",
+    "payer": "rohan",
+    "expense_date_offset_days": -2,
+    "splits": [
+      { "user": "arkadeep", "share": "150.00" },
+      { "user": "rohan", "share": "150.00" },
+      { "user": "priya", "share": "150.00" }
+    ]
+  }
+]

@@ -1,0 +1,128 @@
+[
+  {
+    "recipient": "avery",
+    "notification_type": "expense_added",
+    "title": "New expense added",
+    "message": "Avery added Rs 3,600 for Beach shack dinner in Goa Trip 2026.",
+    "related_group": "goa_trip",
+    "related_expense": "goa_dinner",
+    "context_data": { "amount": "3600.00", "currency": "INR" },
+    "created_at_offset_hours": -72,
+    "read_at_offset_hours": null
+  },
+  {
+    "recipient": "avery",
+    "notification_type": "settlement_completed",
+    "title": "Settlement confirmed",
+    "message": "Rohan confirmed Rs 5,000 paid to you in Flat 12B Rent.",
+    "related_group": "flat_rent",
+    "related_settlement": "set_flat_rent_rohan",
+    "context_data": { "amount": "5000.00", "currency": "INR" },
+    "created_at_offset_hours": -96,
+    "read_at_offset_hours": -90
+  },
+  {
+    "recipient": "avery",
+    "notification_type": "group_invitation",
+    "title": "You have an invitation",
+    "message": "A pending invitation to Mess Food Fund is waiting.",
+    "related_group": null,
+    "context_data": { "invite_code": "MESSFUND01" },
+    "created_at_offset_hours": -24,
+    "read_at_offset_hours": null
+  },
+  {
+    "recipient": "avery",
+    "notification_type": "system",
+    "title": "Welcome to JodTod",
+    "message": "Your account is ready. Start splitting expenses with friends.",
+    "context_data": null,
+    "created_at_offset_hours": -288,
+    "read_at_offset_hours": -280
+  },
+  {
+    "recipient": "rohan",
+    "notification_type": "member_joined_group",
+    "title": "Priya joined Mess Food Fund",
+    "message": "Priya Nair is now a member of Mess Food Fund.",
+    "related_group": "food_mess",
+    "related_user": "priya",
+    "context_data": { "role": "member" },
+    "created_at_offset_hours": -144,
+    "read_at_offset_hours": null
+  },
+  {
+    "recipient": "rohan",
+    "notification_type": "group_settings_updated",
+    "title": "Group updated",
+    "message": "Flat 12B Rent details were updated.",
+    "related_group": "flat_rent",
+    "context_data": { "field": "description" },
+    "created_at_offset_hours": -216,
+    "read_at_offset_hours": -200
+  },
+  {
+    "recipient": "priya",
+    "notification_type": "expense_added",
+    "title": "New expense added",
+    "message": "Priya added Rs 900 for Groceries in Mess Food Fund.",
+    "related_group": "food_mess",
+    "related_expense": "food_groceries",
+    "context_data": { "amount": "900.00", "currency": "INR" },
+    "created_at_offset_hours": -24,
+    "read_at_offset_hours": null
+  },
+  {
+    "recipient": "priya",
+    "notification_type": "budget_alert",
+    "title": "Budget alert",
+    "message": "Mess Food Fund is nearing its monthly budget.",
+    "related_group": "food_mess",
+    "context_data": { "threshold": 0.8 },
+    "created_at_offset_hours": -24,
+    "read_at_offset_hours": null
+  },
+  {
+    "recipient": "priya",
+    "notification_type": "expense_added",
+    "title": "You were added to an expense",
+    "message": "Scooter rental Rs 1,500 split includes you.",
+    "related_group": "goa_trip",
+    "related_expense": "goa_scooter",
+    "context_data": { "amount": "1500.00", "currency": "INR" },
+    "created_at_offset_hours": -48,
+    "read_at_offset_hours": -40
+  },
+  {
+    "recipient": "arkadeep",
+    "notification_type": "expense_added",
+    "title": "New expense added",
+    "message": "Arkadeep added Rs 2,400 for Team lunch in Office Lunch Squad.",
+    "related_group": "office_lunch",
+    "related_expense": "office_lunch_meal",
+    "context_data": { "amount": "2400.00", "currency": "INR" },
+    "created_at_offset_hours": -24,
+    "read_at_offset_hours": null
+  },
+  {
+    "recipient": "arkadeep",
+    "notification_type": "settlement_completed",
+    "title": "Settlement confirmed",
+    "message": "Rohan confirmed Rs 500 paid to you in Office Lunch Squad.",
+    "related_group": "office_lunch",
+    "related_settlement": "set_office_rohan_arkadeep",
+    "context_data": { "amount": "500.00", "currency": "INR" },
+    "created_at_offset_hours": -18,
+    "read_at_offset_hours": null
+  },
+  {
+    "recipient": "arkadeep",
+    "notification_type": "system",
+    "title": "Welcome to JodTod",
+    "message": "Your account is ready. Start splitting expenses with friends.",
+    "related_group": null,
+    "context_data": null,
+    "created_at_offset_hours": -120,
+    "read_at_offset_hours": null
+  }
+]

@@ -159,7 +159,9 @@ export default function GroupSettings() {
             <ActionRow icon="link-outline" label="Invite via Link" onPress={() => router.push(`${base}/invite` as any)} />
             <ActionRow icon="qr-code-outline" label="Invite via QR Code" onPress={() => router.push(`${base}/invite` as any)} />
             <View>
-              <ActionRow icon="notifications-outline" label="Notification Preferences" onPress={() => {}} />
+              {/* App-level notification settings live on Preferences;
+                  previously a dead row with an empty handler. */}
+              <ActionRow icon="notifications-outline" label="Notification Preferences" onPress={() => router.push('/preferences' as any)} />
             </View>
           </View>
         </GlassCard>

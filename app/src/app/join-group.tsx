@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -162,6 +162,18 @@ export default function JoinGroup() {
     router.replace(`/(tabs)/groups/${groupId}` as any);
   };
 
+  // History-less entry (e.g. a cold QR deep link straight to
+  // /join-group?code=) has nothing to pop: fall back to the Groups
+  // list instead of leaving every back button a dead-end no-op.
+  // Same house pattern as currency-selection / SupportForm.
+  const goBackOrGroups = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)/groups' as any);
+    }
+  }, [router]);
+
   const invalid = !loading && (!preview || error);
 
   return (
@@ -178,7 +190,7 @@ export default function JoinGroup() {
         <View className="flex-row items-center px-4 pb-2 pt-1">
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => router.back()}
+            onPress={goBackOrGroups}
             className="h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10"
           >
             <Ionicons name="close" size={20} color="#FFFFFF" />
@@ -219,7 +231,7 @@ export default function JoinGroup() {
                 </Text>
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => router.back()}
+                  onPress={goBackOrGroups}
                   className="mt-4 rounded-full border border-white/20 bg-white/10 px-6 py-2.5"
                 >
                   <Text className="text-[14px] font-bold text-white">Cancel</Text>
@@ -315,7 +327,7 @@ export default function JoinGroup() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => router.back()}
+                  onPress={goBackOrGroups}
                   className="mt-2.5 w-full items-center rounded-2xl border border-white/20 bg-white/10 py-3.5"
                 >
                   <Text className="text-[15px] font-bold text-white">Cancel</Text>

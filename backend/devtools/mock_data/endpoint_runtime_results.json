@@ -1,0 +1,717 @@
+{
+  "target": "local Docker Postgres jodtod_local (127.0.0.1:55432)",
+  "environment": "testing (mock email/OTP providers)",
+  "summary": {
+    "total": 64,
+    "PASS": 37,
+    "FAIL": 19,
+    "BLOCKED": 8,
+    "NOT TESTED": 0
+  },
+  "findings": [
+    {
+      "id": "BUG-1-reserved-tld-login-500",
+      "severity": "high",
+      "summary": "All seeded @jodtod.test users cannot authenticate.",
+      "evidence": "POST /api/auth/login avery@jodtod.test -> HTTP 500: pydantic EmailStr rejects the reserved .test TLD in AuthenticatedUser.model_validate (auth_login_service.py:178). Signup with a .test email -> 422. Only arkadeep@admin.com works.",
+      "impact": "Seed dataset is API-unusable for its original users; multi-user endpoint verification required locally-minted sessions."
+    },
+    {
+      "id": "BUG-2-notification-serializer-500",
+      "severity": "high",
+      "summary": "GET/POST notification endpoints 500 for any user with rows.",
+      "evidence": "EP-036 GET /api/notifications -> 500; NotificationItemResponse declares id:str/type:str/metadata but the ORM model exposes notification_type/context_data/UUID ids (schemas/notification.py vs models/notification.py).",
+      "impact": "EP-036, EP-037, EP-038 fail for every user."
+    },
+    {
+      "id": "BUG-3-silent-rollback-writes",
+      "severity": "critical",
+      "summary": "Group/expense/settlement/invitation writes return 200 but roll back.",
+      "evidence": "Verified against jodtod_local: group rename/archive/rotate, join, add-member, expense create, settlement initiate and invitation create/accept all returned 200 with no persisted row (groups.name and invite_code unchanged; avery not added; arkadeep not in goa_trip; expenses stayed 7; no new settlement/invitation). Services read before `async with transaction(db)`, which cannot own the already-autobegun request session (same class as the previously fixed PATCH /users/me bug).",
+      "impact": "9 endpoints silently no-op: EP-030,031,042,044,045,047,048,051,058 (plus EP-050 as a downstream 404, and EP-059/060/061/062)."
+    }
+  ],
+  "results": [
+    {
+      "id": "EP-001",
+      "method": "POST",
+      "path": "/api/auth/signup",
+      "status": "PASS",
+      "expected": "201",
+      "http_status": 201,
+      "observed": "{\"user\": {\"name\": \"Endpoint Verify\", \"email\": \"endpoint-verify-signup+672af68f60@admin.com\", \"phone\": null, \"id\": \"9e4cd922-b0e7-4bcb-9bbe-7eb742861c4a\", \"username\": null, \"email_verified\": false, \"phone_verified\": false, \"account_status\": ...",
+      "scenario": "new user, unique email",
+      "db_effect": "inserts 1 user + 1 session"
+    },
+    {
+      "id": "EP-002",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"user\": {\"name\": \"Arkadeep\", \"email\": \"arkadeep@admin.com\", \"phone\": \"+919000000005\", \"id\": \"d9c74850-fd48-5fb3-90de-a2ff974ada46\", \"username\": \"arkadeep\", \"email_verified\": true, \"phone_verified\": true, \"account_status\": \"active\", \"avatar...",
+      "scenario": "demo account arkadeep@admin.com",
+      "db_effect": "inserts 1 session"
+    },
+    {
+      "id": "EP-003",
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"message\": \"Logged out.\"}",
+      "scenario": "logout current arkadeep session",
+      "db_effect": "revokes 1 session"
+    },
+    {
+      "id": "EP-004",
+      "method": "POST",
+      "path": "/api/auth/send-otp",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"message\": \"Code generated, but no real SMS/email delivery provider is configured.\", \"expires_at\": \"2026-10-10T18:41:50.080830Z\", \"retry_after_seconds\": null, \"verified\": false, \"provider\": \"mock\", \"provider_accepted\": false, \"delivery_sta...",
+      "scenario": "mock provider, existing phone",
+      "db_effect": "inserts 1 otp_record"
+    },
+    {
+      "id": "EP-005",
+      "method": "POST",
+      "path": "/api/auth/verify-otp",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"user\": {\"name\": \"Arkadeep\", \"email\": \"arkadeep@admin.com\", \"phone\": \"+919000000005\", \"id\": \"d9c74850-fd48-5fb3-90de-a2ff974ada46\", \"username\": \"arkadeep\", \"email_verified\": true, \"phone_verified\": true, \"account_status\": \"active\", \"avatar...",
+      "scenario": "verify issued OTP",
+      "db_effect": "inserts 1 session"
+    },
+    {
+      "id": "EP-006",
+      "method": "POST",
+      "path": "/api/auth/send-email-verification",
+      "status": "BLOCKED",
+      "expected": "200",
+      "http_status": 422,
+      "observed": "{\"detail\": [{\"type\": \"value_error\", \"loc\": [\"body\", \"email\"], \"msg\": \"value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email.\", \"input\": \"guest@jodtod.test\", \"ctx\": {\"r...",
+      "reason": "Mock EMAIL_PROVIDER reports accepted=False by design, so issuance is invalidated and no dev_code is returned. Positive run needs real SMTP creds."
+    },
+    {
+      "id": "EP-007",
+      "method": "POST",
+      "path": "/api/auth/verify-email",
+      "status": "BLOCKED",
+      "expected": "200",
+      "http_status": null,
+      "observed": null,
+      "reason": "No dev_code; blocked on EP-006 / real SMTP."
+    },
+    {
+      "id": "EP-008",
+      "method": "POST",
+      "path": "/api/auth/forgot-password",
+      "status": "BLOCKED",
+      "expected": "200",
+      "http_status": 502,
+      "observed": "{\"detail\": \"Email delivery was rejected by the provider.\", \"code\": \"EMAIL_PROVIDER_REJECTED\"}",
+      "reason": "Mock EMAIL_PROVIDER reports accepted=False by design; no dev_code. Positive run needs real SMTP creds."
+    },
+    {
+      "id": "EP-009",
+      "method": "POST",
+      "path": "/api/auth/reset-password",
+      "status": "BLOCKED",
+      "expected": "200",
+      "http_status": null,
+      "observed": null,
+      "reason": "No dev_code; blocked on EP-008 / real SMTP."
+    },
+    {
+      "id": "EP-010",
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOWM3NDg1MC1mZDQ4LTVmYjMtOTBkZS1hMmZmOTc0YWRhNDYiLCJzaWQiOiI0MTZmMTg0Mi1jM2RmLTQ3MmMtODY1Mi05NTJjMDBmYWMxMDIiLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzkxNjU3NDEyLCJleHAiOjE3OTE2NTgzM...",
+      "scenario": "rotate arkadeep refresh token",
+      "db_effect": "updates sessions refresh hash"
+    },
+    {
+      "id": "EP-011",
+      "method": "POST",
+      "path": "/api/auth/google",
+      "status": "BLOCKED",
+      "expected": "200",
+      "http_status": 401,
+      "observed": "{\"detail\": \"Invalid provider credential.\", \"code\": \"INVALID_OAUTH_TOKEN\"}",
+      "scenario": "provider ID token required",
+      "reason": "Requires a real provider-issued ID token + JWKS/audience config; dummy token correctly rejected (fail-closed)."
+    },
+    {
+      "id": "EP-012",
+      "method": "POST",
+      "path": "/api/auth/apple",
+      "status": "BLOCKED",
+      "expected": "200",
+      "http_status": 503,
+      "observed": "{\"detail\": \"Apple sign-in is not configured.\", \"code\": \"OAUTH_NOT_CONFIGURED\"}",
+      "scenario": "provider ID token required",
+      "reason": "Requires a real provider-issued ID token + JWKS/audience config; dummy token correctly rejected (fail-closed)."
+    },
+    {
+      "id": "EP-013",
+      "method": "GET",
+      "path": "/api/users/me",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"user\": {\"name\": \"Arkadeep\", \"email\": \"arkadeep@admin.com\", \"phone\": \"+919000000005\", \"id\": \"d9c74850-fd48-5fb3-90de-a2ff974ada46\", \"username\": \"arkadeep\", \"email_verified\": true, \"phone_verified\": true, \"account_status\": \"active\", \"avatar...",
+      "scenario": "arkadeep session"
+    },
+    {
+      "id": "EP-014",
+      "method": "GET",
+      "path": "/api/users/me/profile",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"profile\": {\"name\": \"Arkadeep\", \"email\": \"arkadeep@admin.com\", \"phone\": \"+919000000005\", \"id\": \"d9c74850-fd48-5fb3-90de-a2ff974ada46\", \"username\": \"arkadeep\", \"email_verified\": true, \"phone_verified\": true, \"account_status\": \"active\", \"ava...",
+      "scenario": "arkadeep dashboard"
+    },
+    {
+      "id": "EP-015",
+      "method": "PATCH",
+      "path": "/api/users/me",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"user\": {\"name\": \"Arkadeep Verified\", \"email\": \"arkadeep@admin.com\", \"phone\": \"+919000000005\", \"id\": \"d9c74850-fd48-5fb3-90de-a2ff974ada46\", \"username\": \"arkadeep\", \"email_verified\": true, \"phone_verified\": true, \"account_status\": \"active\"...",
+      "scenario": "rename self",
+      "db_effect": "updates users.name"
+    },
+    {
+      "id": "EP-016",
+      "method": "POST",
+      "path": "/api/users/me/photo",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"user_id\": \"d9c74850-fd48-5fb3-90de-a2ff974ada46\", \"avatar_url\": \"/uploads/profile_photos/e2d130a038944c9a841cf72c34b018d8.png\"}",
+      "scenario": "1x1 PNG upload",
+      "db_effect": "updates users.avatar_url + writes file"
+    },
+    {
+      "id": "EP-017",
+      "method": "DELETE",
+      "path": "/api/users/me/photo",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"user_id\": \"d9c74850-fd48-5fb3-90de-a2ff974ada46\", \"avatar_url\": null}",
+      "scenario": "remove photo",
+      "db_effect": "clears users.avatar_url"
+    },
+    {
+      "id": "EP-018",
+      "method": "GET",
+      "path": "/api/users/sessions",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"sessions\": [{\"id\": \"289e34d8-9fe5-4899-bfad-f840a4a01f20\", \"device_id\": \"verify-otp-phone\", \"device_name\": null, \"platform\": null, \"app_version\": null, \"expires_at\": \"2026-11-09T18:36:50.103924Z\", \"last_used_at\": \"2026-10-10T18:36:50.1038...",
+      "scenario": "list sessions"
+    },
+    {
+      "id": "EP-019",
+      "method": "POST",
+      "path": "/api/users/sessions/4ef38c8e-dc56-4508-a79c-9722f5cb47a8/revoke",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"message\": \"Session revoked.\"}",
+      "scenario": "revoke a non-current session",
+      "db_effect": "sets sessions.revoked_at"
+    },
+    {
+      "id": "EP-020",
+      "method": "GET",
+      "path": "/api/users/me/preferences",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"currency\": \"INR\", \"date_format\": \"DD/MM/YYYY\", \"start_of_week\": \"monday\", \"app_language\": \"en\", \"display_name\": \"account_name\"}"
+    },
+    {
+      "id": "EP-021",
+      "method": "PATCH",
+      "path": "/api/users/me/preferences",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"currency\": \"INR\", \"date_format\": \"MM/DD/YYYY\", \"start_of_week\": \"monday\", \"app_language\": \"en\", \"display_name\": \"username\"}",
+      "db_effect": "updates user_preferences"
+    },
+    {
+      "id": "EP-022",
+      "method": "GET",
+      "path": "/api/users/me/notifications/counts",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"expense_updates\": 1, \"settlement_reminders\": 1, \"group_invitations\": 1}",
+      "scenario": "derived from activity rows"
+    },
+    {
+      "id": "EP-023",
+      "method": "GET",
+      "path": "/api/users/me/linked-accounts",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"email\": {\"connected\": true, \"email\": \"arkadeep@admin.com\", \"verified\": true}, \"phone\": {\"connected\": true, \"phone\": \"+919000000005\", \"verified\": true}, \"google\": {\"connected\": false, \"email\": null, \"connected_at\": null, \"last_verified_at\"..."
+    },
+    {
+      "id": "EP-024",
+      "method": "POST",
+      "path": "/api/users/me/linked-accounts/{provider}/link",
+      "status": "BLOCKED",
+      "expected": "200",
+      "http_status": 401,
+      "observed": "{\"detail\": \"Provider verification failed.\"}",
+      "scenario": "google link",
+      "reason": "Requires a real Google ID token + configured client IDs; dummy token correctly rejected (fail-closed). No provider secrets in sandbox."
+    },
+    {
+      "id": "EP-025",
+      "method": "DELETE",
+      "path": "/api/users/me/linked-accounts/{provider}/unlink",
+      "status": "BLOCKED",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"email\": {\"connected\": true, \"email\": \"arkadeep@admin.com\", \"verified\": true}, \"phone\": {\"connected\": true, \"phone\": \"+919000000005\", \"verified\": true}, \"google\": {\"connected\": false, \"email\": null, \"connected_at\": null, \"last_verified_at\"...",
+      "scenario": "unlink google when not linked (negative path)",
+      "reason": "Arkadeep has no google link, so the endpoint correctly refuses; a positive unlink needs a genuinely linked provider (EP-024 blocked)."
+    },
+    {
+      "id": "EP-026",
+      "method": "GET",
+      "path": "/api/support/faqs",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"faqs\": [{\"id\": \"91dc3026-f850-49d2-a477-9de391ad3197\", \"question\": \"How do I create a group?\", \"answer\": \"Open the Groups tab and tap Create. Give the group a name, add members, and start tracking shared expenses together.\", \"category\": \"..."
+    },
+    {
+      "id": "EP-027",
+      "method": "POST",
+      "path": "/api/support/requests",
+      "status": "PASS",
+      "expected": "201",
+      "http_status": 201,
+      "observed": "{\"id\": \"79b66b71-cf88-43c1-b8d6-8b4771c98e33\", \"type\": \"bug\", \"subject\": \"Verification bug report\", \"description\": \"Filed while checking POST /api/support/requests.\", \"app_version\": \"1.0.0\", \"screen\": \"help-support\", \"status\": \"open\", \"crea...",
+      "db_effect": "inserts 1 support_request"
+    },
+    {
+      "id": "EP-028",
+      "method": "GET",
+      "path": "/api/support/requests",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"requests\": [{\"id\": \"79b66b71-cf88-43c1-b8d6-8b4771c98e33\", \"type\": \"bug\", \"subject\": \"Verification bug report\", \"description\": \"Filed while checking POST /api/support/requests.\", \"app_version\": \"1.0.0\", \"screen\": \"help-support\", \"status\":..."
+    },
+    {
+      "id": "EP-029",
+      "method": "GET",
+      "path": "/api/invitations/mine",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"invitations\": [{\"id\": \"8402a663-1759-52b5-b5cc-3088bba11261\", \"group_name\": \"Goa Trip 2026\", \"invite_code\": \"GOA2026SEED\", \"invited_by\": \"Avery Sharma\", \"status\": \"pending\", \"created_at\": \"2026-10-10T18:24:11.553485Z\"}]}"
+    },
+    {
+      "id": "EP-030",
+      "method": "POST",
+      "path": "/api/invitations",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"9447631a-4f02-4c13-ae81-4b2c8be7693f\", \"group_name\": \"Manali Weekend\", \"invite_code\": \"MANALI001\", \"invited_by\": \"Arkadeep\", \"status\": \"pending\", \"created_at\": \"2026-10-10T18:36:50.800547Z\"}",
+      "db_effect": "inserts 1 invitation for avery",
+      "reason": "HTTP 200 but no DB effect: create_invitation did not persist. Service reads before transaction(); the autobegun session means transaction() never commits (use write_transaction())."
+    },
+    {
+      "id": "EP-031",
+      "method": "POST",
+      "path": "/api/invitations/8402a663-1759-52b5-b5cc-3088bba11261/accept",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"8402a663-1759-52b5-b5cc-3088bba11261\", \"group_name\": \"Goa Trip 2026\", \"invite_code\": \"GOA2026SEED\", \"invited_by\": \"Avery Sharma\", \"status\": \"accepted\", \"created_at\": \"2026-10-10T18:24:11.553485Z\"}",
+      "scenario": "accept seeded pending invitation",
+      "db_effect": "marks invitation accepted",
+      "reason": "HTTP 200 but no DB effect: invitation accept did not persist. Service reads before transaction(); the autobegun session means transaction() never commits (use write_transaction())."
+    },
+    {
+      "id": "EP-032",
+      "method": "POST",
+      "path": "/api/invitations/9447631a-4f02-4c13-ae81-4b2c8be7693f/decline",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 404,
+      "observed": "{\"detail\": \"Invitation not found.\"}",
+      "scenario": "avery declines created invitation",
+      "db_effect": "marks invitation declined"
+    },
+    {
+      "id": "EP-033",
+      "method": "GET",
+      "path": "/api/activities",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"items\": [{\"id\": \"fbc8deac-ac15-5494-a3ba-9391ea23a25c\", \"type\": \"settlement\", \"title\": \"Rohan paid you\", \"subtitle\": \"Confirmed settlement in Office Lunch Squad\", \"amount\": \"Rs 500\", \"occurred_at\": \"2026-10-10T00:24:12.598874Z\", \"member_k..."
+    },
+    {
+      "id": "EP-034",
+      "method": "GET",
+      "path": "/api/activities/fbc8deac-ac15-5494-a3ba-9391ea23a25c",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"fbc8deac-ac15-5494-a3ba-9391ea23a25c\", \"type\": \"settlement\", \"title\": \"Rohan paid you\", \"subtitle\": \"Confirmed settlement in Office Lunch Squad\", \"amount\": \"Rs 500\", \"occurred_at\": \"2026-10-10T00:24:12.598874Z\", \"member_key\": \"rohan..."
+    },
+    {
+      "id": "EP-035",
+      "method": "POST",
+      "path": "/api/activities",
+      "status": "PASS",
+      "expected": "201",
+      "http_status": 201,
+      "observed": "{\"id\": \"3cf6129d-2827-4dcb-8908-8eae2fa0d74a\", \"type\": \"expense\", \"title\": \"Manual activity\", \"subtitle\": \"Created during verification\", \"amount\": \"Rs 100\", \"occurred_at\": \"2026-10-10T18:36:51.015389Z\", \"member_key\": null, \"group_name\": \"Of...",
+      "db_effect": "inserts 1 activity"
+    },
+    {
+      "id": "EP-036",
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 500,
+      "observed": "Traceback (most recent call last):\n  File \"D:\\JodTod\\backend\\.venv\\Lib\\site-packages\\starlette\\middleware\\errors.py\", line 164, in __call__\n    await self.app(scope, receive, _send)\n  File \"D:\\JodTod\\backend\\.venv\\Lib\\site-packages\\starlett...",
+      "scenario": "arkadeep has 3 seeded notifications",
+      "reason": "Backend 500: NotificationItemResponse cannot map the ORM row (id UUID vs str, 'type' not an attribute, 'metadata' vs context_data)."
+    },
+    {
+      "id": "EP-037",
+      "method": "GET",
+      "path": "/api/notifications/0b19961a-ae8f-5fb3-82ef-ad23dbd72b9f",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 500,
+      "observed": "Traceback (most recent call last):\n  File \"D:\\JodTod\\backend\\.venv\\Lib\\site-packages\\starlette\\middleware\\errors.py\", line 164, in __call__\n    await self.app(scope, receive, _send)\n  File \"D:\\JodTod\\backend\\.venv\\Lib\\site-packages\\starlett...",
+      "scenario": "deterministic seeded notification id",
+      "reason": "Same serializer bug as EP-036."
+    },
+    {
+      "id": "EP-038",
+      "method": "POST",
+      "path": "/api/notifications/0b19961a-ae8f-5fb3-82ef-ad23dbd72b9f/read",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 500,
+      "observed": "Traceback (most recent call last):\n  File \"D:\\JodTod\\backend\\.venv\\Lib\\site-packages\\starlette\\middleware\\errors.py\", line 164, in __call__\n    await self.app(scope, receive, _send)\n  File \"D:\\JodTod\\backend\\.venv\\Lib\\site-packages\\starlett...",
+      "scenario": "mark read",
+      "reason": "Same serializer bug as EP-036."
+    },
+    {
+      "id": "EP-039",
+      "method": "GET",
+      "path": "/api/notifications/unread/count",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"unread_count\": 3}"
+    },
+    {
+      "id": "EP-040",
+      "method": "POST",
+      "path": "/api/groups",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"1aed304c-a541-49aa-b64b-8166fd8e8764\", \"name\": \"Verification Group\", \"group_type\": \"trip\", \"currency\": \"INR\", \"image_url\": null, \"lifecycle\": \"active\", \"settlement_status\": \"pending\", \"member_count\": 1, \"you_owe\": \"0.00\", \"you_are_o...",
+      "db_effect": "inserts group + admin member"
+    },
+    {
+      "id": "EP-041",
+      "method": "GET",
+      "path": "/api/groups",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"groups\": [{\"id\": \"1aed304c-a541-49aa-b64b-8166fd8e8764\", \"name\": \"Verification Group\", \"group_type\": \"trip\", \"currency\": \"INR\", \"image_url\": null, \"lifecycle\": \"active\", \"settlement_status\": \"settled\", \"member_count\": 1, \"you_owe\": \"0.00\"..."
+    },
+    {
+      "id": "EP-042",
+      "method": "POST",
+      "path": "/api/groups/join",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"d6031203-f6cb-55bb-9c7a-84937346ac39\", \"name\": \"Goa Trip 2026\", \"group_type\": \"trip\", \"currency\": \"INR\", \"image_url\": null, \"lifecycle\": \"active\", \"settlement_status\": \"pending\", \"member_count\": 4, \"you_owe\": \"0.00\", \"you_are_owed\":...",
+      "scenario": "arkadeep joins goa_trip",
+      "db_effect": "inserts 1 group_member",
+      "reason": "HTTP 200 but no DB effect: group join did not persist. Service reads before transaction(); the autobegun session means transaction() never commits (use write_transaction())."
+    },
+    {
+      "id": "EP-043",
+      "method": "GET",
+      "path": "/api/groups/6c8d7670-627c-51bb-a66a-c9c88dc76bac",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"6c8d7670-627c-51bb-a66a-c9c88dc76bac\", \"name\": \"Office Lunch Squad\", \"description\": \"Weekday lunches and coffee runs near the office.\", \"group_type\": \"food\", \"currency\": \"INR\", \"image_url\": null, \"lifecycle\": \"active\", \"settlement_s...",
+      "scenario": "office_lunch detail"
+    },
+    {
+      "id": "EP-044",
+      "method": "PATCH",
+      "path": "/api/groups/6c8d7670-627c-51bb-a66a-c9c88dc76bac",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"6c8d7670-627c-51bb-a66a-c9c88dc76bac\", \"name\": \"Office Lunch Squad (verified)\", \"description\": \"Weekday lunches and coffee runs near the office.\", \"group_type\": \"food\", \"currency\": \"INR\", \"image_url\": null, \"lifecycle\": \"active\", \"i...",
+      "scenario": "admin rename",
+      "db_effect": "updates groups.name",
+      "reason": "HTTP 200 but no DB effect: group update did not persist. Service reads before transaction(); the autobegun session means transaction() never commits (use write_transaction())."
+    },
+    {
+      "id": "EP-045",
+      "method": "POST",
+      "path": "/api/groups/6c8d7670-627c-51bb-a66a-c9c88dc76bac/members",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"user_id\": \"c1b808ad-f9c9-5a5d-a2da-a92ece88b671\", \"display_name\": \"Avery Sharma\", \"avatar_url\": null, \"role\": \"member\", \"net_balance\": \"0.00\"}",
+      "scenario": "add avery",
+      "db_effect": "inserts 1 group_member",
+      "reason": "HTTP 200 but no DB effect: add member did not persist. Service reads before transaction(); the autobegun session means transaction() never commits (use write_transaction())."
+    },
+    {
+      "id": "EP-046",
+      "method": "DELETE",
+      "path": "/api/groups/d6031203-f6cb-55bb-9c7a-84937346ac39/members/me",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 404,
+      "observed": "{\"detail\": \"Group not found.\"}",
+      "scenario": "arkadeep leaves goa_trip",
+      "db_effect": "deletes 1 group_member"
+    },
+    {
+      "id": "EP-047",
+      "method": "POST",
+      "path": "/api/groups/1aed304c-a541-49aa-b64b-8166fd8e8764/archive",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"1aed304c-a541-49aa-b64b-8166fd8e8764\", \"lifecycle\": \"archived\"}",
+      "db_effect": "sets groups.lifecycle=archived",
+      "reason": "HTTP 200 but no DB effect: group archive did not persist. Service reads before transaction(); the autobegun session means transaction() never commits (use write_transaction())."
+    },
+    {
+      "id": "EP-048",
+      "method": "POST",
+      "path": "/api/groups/6c8d7670-627c-51bb-a66a-c9c88dc76bac/invite-code/rotate",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"6c8d7670-627c-51bb-a66a-c9c88dc76bac\", \"invite_code\": \"16BE3B89\"}",
+      "db_effect": "updates groups.invite_code",
+      "reason": "HTTP 200 but no DB effect: invite-code rotate did not persist. Service reads before transaction(); the autobegun session means transaction() never commits (use write_transaction())."
+    },
+    {
+      "id": "EP-049",
+      "method": "GET",
+      "path": "/api/groups/6c8d7670-627c-51bb-a66a-c9c88dc76bac/suggestions",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"group_id\": \"6c8d7670-627c-51bb-a66a-c9c88dc76bac\", \"group_name\": \"Office Lunch Squad\", \"suggestions\": [{\"payer_user_id\": \"3b0ec6ec-55e1-5e88-86f7-f7eb3fa29671\", \"payer_name\": \"Priya Nair\", \"payer_avatar_url\": null, \"receiver_user_id\": \"d9..."
+    },
+    {
+      "id": "EP-050",
+      "method": "GET",
+      "path": "/api/groups/search/by-code",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 404,
+      "observed": "{\"detail\": \"Invite code is invalid.\"}",
+      "reason": "404 'Invite code is invalid': the EP-048 rotate never persisted, so the code it returned is stale (consequence of the silent-rollback bug)."
+    },
+    {
+      "id": "EP-051",
+      "method": "POST",
+      "path": "/api/expenses",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"38ac5d99-8943-4d92-afea-d0d8e803bba6\", \"group_id\": \"6c8d7670-627c-51bb-a66a-c9c88dc76bac\", \"title\": \"Verification coffee\", \"description\": \"Equal split verified via API.\", \"amount\": \"300.00\", \"currency\": \"INR\", \"payer_user_id\": \"d9c7...",
+      "db_effect": "inserts 1 expense + 3 splits",
+      "reason": "HTTP 200 but no DB effect: expense create did not persist. Service reads before transaction(); the autobegun session means transaction() never commits (use write_transaction())."
+    },
+    {
+      "id": "EP-052",
+      "method": "GET",
+      "path": "/api/expenses",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"expenses\": [{\"id\": \"e667fbf0-a8a7-5ae7-9713-a6f72ce04799\", \"group_id\": \"6c8d7670-627c-51bb-a66a-c9c88dc76bac\", \"title\": \"Team lunch\", \"description\": \"Lunch at the cafe.\", \"amount\": \"2400.00\", \"currency\": \"INR\", \"payer_user_id\": \"d9c74850-..."
+    },
+    {
+      "id": "EP-053",
+      "method": "GET",
+      "path": "/api/settlements/people",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"people\": [{\"user_id\": \"3b0ec6ec-55e1-5e88-86f7-f7eb3fa29671\", \"display_name\": \"Priya Nair\", \"profile_photo\": null, \"common_group_count\": 1, \"you_owe\": \"0.00\", \"they_owe\": \"800.00\", \"net_balance\": \"800.00\", \"direction\": \"THEY_OWE\"}, {\"user..."
+    },
+    {
+      "id": "EP-054",
+      "method": "GET",
+      "path": "/api/settlements/people/3b0ec6ec-55e1-5e88-86f7-f7eb3fa29671",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"user_id\": \"3b0ec6ec-55e1-5e88-86f7-f7eb3fa29671\", \"display_name\": \"Priya Nair\", \"profile_photo\": null, \"you_owe\": \"0.00\", \"they_owe\": \"800.00\", \"net_balance\": \"800.00\", \"direction\": \"THEY_OWE\", \"groups\": [{\"group_id\": \"6c8d7670-627c-51bb-..."
+    },
+    {
+      "id": "EP-055",
+      "method": "GET",
+      "path": "/api/settlements/people/3b0ec6ec-55e1-5e88-86f7-f7eb3fa29671/history",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"settlements\": [], \"total\": 0}"
+    },
+    {
+      "id": "EP-056",
+      "method": "GET",
+      "path": "/api/settlements/pending-confirmations",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"pending\": [{\"id\": \"1b2c1738-83f4-57b7-885a-1ce83a42c92f\", \"group_id\": \"d6031203-f6cb-55bb-9c7a-84937346ac39\", \"group_name\": \"Goa Trip 2026\", \"payer_user_id\": \"3b0ec6ec-55e1-5e88-86f7-f7eb3fa29671\", \"payer_name\": \"Priya Nair\", \"receiver_us...",
+      "scenario": "avery = receiver of seeded pending settlement"
+    },
+    {
+      "id": "EP-057",
+      "method": "GET",
+      "path": "/api/settlements/groups/6c8d7670-627c-51bb-a66a-c9c88dc76bac/history",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"settlements\": [{\"id\": \"fae20dcd-0492-526f-9237-64e6b63d3934\", \"group_id\": \"6c8d7670-627c-51bb-a66a-c9c88dc76bac\", \"group_name\": \"Office Lunch Squad\", \"payer_user_id\": \"17081b5c-c1ae-5469-b15a-b6aee27974e8\", \"payer_name\": \"Rohan Mehta\", \"r..."
+    },
+    {
+      "id": "EP-058",
+      "method": "POST",
+      "path": "/api/settlements",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"id\": \"a35ea4fd-6369-4fac-a1ef-d543c8c96477\", \"group_id\": \"d6031203-f6cb-55bb-9c7a-84937346ac39\", \"group_name\": \"Goa Trip 2026\", \"payer_user_id\": \"3b0ec6ec-55e1-5e88-86f7-f7eb3fa29671\", \"payer_name\": \"Priya Nair\", \"receiver_user_id\": \"c1b8...",
+      "scenario": "priya (debtor) initiates -> avery",
+      "db_effect": "inserts 1 pending settlement",
+      "reason": "HTTP 200 but no DB effect: settlement initiate did not persist. Service reads before transaction(); the autobegun session means transaction() never commits (use write_transaction())."
+    },
+    {
+      "id": "EP-059",
+      "method": "GET",
+      "path": "/api/settlements/a35ea4fd-6369-4fac-a1ef-d543c8c96477",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 404,
+      "observed": "{\"detail\": \"Settlement not found.\"}"
+    },
+    {
+      "id": "EP-060",
+      "method": "POST",
+      "path": "/api/settlements/a35ea4fd-6369-4fac-a1ef-d543c8c96477/confirm",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 404,
+      "observed": "{\"detail\": \"Settlement not found.\"}",
+      "scenario": "receiver confirms",
+      "db_effect": "sets settlement status=paid"
+    },
+    {
+      "id": "EP-061",
+      "method": "POST",
+      "path": "/api/settlements/e652abfd-fb9c-4722-a8c9-ae16a4d36e2d/reject",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 404,
+      "observed": "{\"detail\": \"Settlement not found.\"}",
+      "db_effect": "sets settlement status=rejected"
+    },
+    {
+      "id": "EP-062",
+      "method": "POST",
+      "path": "/api/settlements/a806b30c-a4e5-4783-bcdc-ec8e57ddb602/cancel",
+      "status": "FAIL",
+      "expected": "200",
+      "http_status": 404,
+      "observed": "{\"detail\": \"Settlement not found.\"}",
+      "db_effect": "sets settlement status=cancelled"
+    },
+    {
+      "id": "EP-063",
+      "method": "GET",
+      "path": "/api/health",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"status\": \"ok\", \"service\": \"JodTod API\", \"version\": \"v1\"}",
+      "scenario": "live ASGI call",
+      "db_effect": "none"
+    },
+    {
+      "id": "EP-064",
+      "method": "GET",
+      "path": "/",
+      "status": "PASS",
+      "expected": "200",
+      "http_status": 200,
+      "observed": "{\"message\": \"Welcome to the JodTod Backend!\"}",
+      "scenario": "live ASGI call",
+      "db_effect": "none"
+    }
+  ],
+  "db_state_verified_after_run": {
+    "groups.office_lunch.name_after_EP-044": "Office Lunch Squad (unchanged)",
+    "groups.office_lunch.invite_code_after_EP-048": "OFFICELSQ01 (unchanged)",
+    "groups.verification.lifecycle_after_EP-047": "active (not archived)",
+    "goa_trip.members": [
+      "avery",
+      "rohan",
+      "priya"
+    ],
+    "arkadeep.memberships": [
+      "office_lunch(admin)",
+      "Verification Group(admin)"
+    ],
+    "users.name_after_EP-015": "Arkadeep Verified (persisted - control OK)",
+    "expenses.count": 7,
+    "activities.count": 15,
+    "support_requests.count": 4,
+    "settlements.count": 4,
+    "users.count": 7
+  },
+  "executed_at_utc": "2026-10-11"
+}

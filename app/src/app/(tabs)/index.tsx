@@ -287,6 +287,7 @@ function FlowDots({
 // ---------------------------------------------------------------------------
 
 type HomeGroup = {
+  id: string;
   name: string;
   members: string;
   amount: string;
@@ -294,9 +295,24 @@ type HomeGroup = {
   tint: string;
 };
 
-type FlowPerson = { name: string; amount: string; initial: string; tint: string };
+type FlowPerson = { id: string; name: string; amount: string; initial: string; tint: string };
+
+// Never render more than this many arrows per flow; the header sub-line
+// always shows the real total, so capping never misrepresents the count.
+const MAX_FLOW_ARROWS = 5;
+
+// Curve slots sit at fixed anchor rows (top/middle/bottom of the panel).
+// For fewer people, use spread-out slots so each arrow stays aligned
+// with its person row: 1 person -> middle, 2 -> top+bottom, 3 -> all.
+function slotsFor(count: number): number[] {
+  if (count <= 0) return [];
+  if (count === 1) return [1];
+  if (count === 2) return [0, 2];
+  return [0, 1, 2];
+}
 
 type RecentExpense = {
+  id: string;
   title: string;
   meta: string;
   amount: string;
@@ -375,27 +391,33 @@ export default function Home() {
     .sort((a, b) => toPaiseSafe(b.you_owe) - toPaiseSafe(a.you_owe));
 
   const toFlow = (p: PersonSummary, amount: string): FlowPerson => ({
+    id: p.user_id,
     name: p.display_name.toUpperCase(),
     amount,
     initial: initialsOf(p.display_name),
     tint: tintFor(p.display_name),
   });
-  const flowLeft: FlowPerson[] = (flowTab === 'get' ? theyOweMe : iOweThem)
-    .slice(0, 3)
+  // Dynamic people for the active flow: the category list is already one
+  // row per distinct person (backend-aggregated) filtered to positive
+  // balances above, so settled/zero relationships are excluded and no
+  // person is double-counted. Cap at MAX_FLOW_ARROWS and split balanced
+  // across the two columns (left gets the odd one out).
+  const flowSource = flowTab === 'get' ? theyOweMe : iOweThem;
+  const flowPeople: FlowPerson[] = flowSource
+    .slice(0, MAX_FLOW_ARROWS)
     .map((p) =>
       toFlow(p, fmtINR(toPaiseSafe(flowTab === 'get' ? p.they_owe : p.you_owe))),
     );
-  const flowRight: FlowPerson[] = (flowTab === 'get' ? theyOweMe : iOweThem)
-    .slice(3, 6)
-    .map((p) =>
-      toFlow(p, fmtINR(toPaiseSafe(flowTab === 'get' ? p.they_owe : p.you_owe))),
-    );
+  const flowLeftCount = Math.ceil(flowPeople.length / 2);
+  const flowLeft: FlowPerson[] = flowPeople.slice(0, flowLeftCount);
+  const flowRight: FlowPerson[] = flowPeople.slice(flowLeftCount);
 
   const groups: HomeGroup[] = homeGroups.slice(0, 2).map((g, i) => {
     const owed = toPaiseSafe(g.you_are_owed);
     const owe = toPaiseSafe(g.you_owe);
     const net = owed - owe;
     return {
+      id: g.id,
       name: g.name,
       members:
         g.member_count === 1 ? '1 member' : `${g.member_count} members`,
@@ -411,6 +433,7 @@ export default function Home() {
       myKey.length > 0 &&
       (a.actor_name ?? '').trim().toLowerCase() === myKey;
     return {
+      id: a.id,
       title: a.title,
       meta: `${a.group_name ?? 'Group'} • ${activityDateLabel(a.occurred_at)}`,
       amount: a.amount ?? '',
@@ -445,6 +468,12 @@ export default function Home() {
     strokeRight: isGet ? CYAN : '#F59E0B',
     markerLeft: isGet ? 'arrowG' : 'arrowR',
     markerRight: isGet ? 'arrowC' : 'arrowO',
+    // Direction follows the money, per mode. Incoming (they owe me)
+    // uses TOWARD geometry: paths run person -> avatar with the
+    // markerEnd arrowhead landing at the central user. Outgoing (I owe
+    // them) uses AWAY: avatar -> person, heads at the people. Dots
+    // travel t=0->1 along the same paths, so animation always matches
+    // the arrowheads. Data, balances, and settlement math untouched.
     pathsLeft: isGet ? FLOW_TOWARD_LEFT : FLOW_AWAY_LEFT,
     pathsRight: isGet ? FLOW_TOWARD_RIGHT : FLOW_AWAY_RIGHT,
     particleLeft: isGet ? '#6EE7B7' : '#FDA4AF',
@@ -529,7 +558,7 @@ export default function Home() {
               </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => router.push('/(tabs)/notifications' as any)}
+              onPress={() => router.push('/notifications' as any)}
               className="h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10"
             >
               <Ionicons name="notifications" size={20} color="#FFFFFF" />
@@ -744,9 +773,13 @@ export default function Home() {
                   <View className="flex-1 flex-row items-stretch justify-between gap-1.5">
                     {/* Left people */}
                     <View className="flex-[30] justify-between py-1">
+                      {/* Single row is vertically centered (spacers keep the
+                          panel height stable so nothing jumps as data loads);
+                          two rows sit top/bottom via justify-between. */}
+                      {fin.left.length === 1 && <View className="flex-1" />}
                       {fin.left.map((p) => (
                         <View
-                          key={p.name}
+                          key={p.id}
                           className="flex-row items-center rounded-xl border border-white/20 bg-white/10 px-1.5 py-1.5"
                         >
                           <View
@@ -764,16 +797,17 @@ export default function Home() {
                             >
                               {p.name}
                             </Text>
-                            <Text
-                              className="text-[14px] font-extrabold"
-                              style={{ color: fin.amountLeft }}
-                              numberOfLines={1}
-                            >
-                              {p.amount}
-                            </Text>
-                          </View>
+                          <Text
+                            className="text-[14px] font-extrabold"
+                            style={{ color: fin.amountLeft }}
+                            numberOfLines={1}
+                          >
+                            {p.amount}
+                          </Text>
                         </View>
+                      </View>
                       ))}
+                      {fin.left.length === 1 && <View className="flex-1" />}
                     </View>
 
                     {/* Center user */}
@@ -803,9 +837,10 @@ export default function Home() {
 
                     {/* Right people */}
                     <View className="flex-[30] justify-between py-1">
+                      {fin.right.length === 1 && <View className="flex-1" />}
                       {fin.right.map((p) => (
                         <View
-                          key={p.name}
+                          key={p.id}
                           className="flex-row items-center rounded-xl border border-white/20 bg-white/10 px-1.5 py-1.5"
                         >
                           <View
@@ -823,16 +858,17 @@ export default function Home() {
                             >
                               {p.name}
                             </Text>
-                            <Text
-                              className="text-[14px] font-extrabold"
-                              style={{ color: fin.amountRight }}
-                              numberOfLines={1}
-                            >
-                              {p.amount}
-                            </Text>
-                          </View>
+                          <Text
+                            className="text-[14px] font-extrabold"
+                            style={{ color: fin.amountRight }}
+                            numberOfLines={1}
+                          >
+                            {p.amount}
+                          </Text>
                         </View>
+                      </View>
                       ))}
+                      {fin.right.length === 1 && <View className="flex-1" />}
                     </View>
                   </View>
 
@@ -885,8 +921,14 @@ export default function Home() {
                         <Path d="M0,0 L7,3.5 L0,7 Z" fill="#F59E0B" opacity={0.95} />
                       </Marker>
                     </Defs>
-                    {fin.pathsLeft.map((c, i) => (
-                      <React.Fragment key={`l${i}`}>
+                    {/* One arrow per person on this side (slots spread so
+                        arrows align with their rows; zero people renders
+                        zero arrows). Slot keys keep surviving arrows
+                        mounted — no animation restart when counts change. */}
+                    {slotsFor(fin.left.length).map((slot) => {
+                      const c = fin.pathsLeft[slot];
+                      return (
+                      <React.Fragment key={`l${slot}`}>
                         <Path
                           d={cubicD(c)}
                           stroke={fin.strokeLeft}
@@ -907,12 +949,15 @@ export default function Home() {
                         <FlowDots
                           curve={c}
                           color={fin.particleLeft}
-                          delay={i * 280}
+                          delay={slot * 280}
                         />
                       </React.Fragment>
-                    ))}
-                    {fin.pathsRight.map((c, i) => (
-                      <React.Fragment key={`r${i}`}>
+                      );
+                    })}
+                    {slotsFor(fin.right.length).map((slot) => {
+                      const c = fin.pathsRight[slot];
+                      return (
+                      <React.Fragment key={`r${slot}`}>
                         <Path
                           d={cubicD(c)}
                           stroke={fin.strokeRight}
@@ -933,10 +978,11 @@ export default function Home() {
                         <FlowDots
                           curve={c}
                           color={fin.particleRight}
-                          delay={i * 280 + 140}
+                          delay={slot * 280 + 140}
                         />
                       </React.Fragment>
-                    ))}
+                      );
+                    })}
                   </Svg>
                 </View>
                 {fin.left.length === 0 && fin.right.length === 0 && !homeLoading ? (
@@ -968,9 +1014,20 @@ export default function Home() {
             ) : (
             <View className="flex-row gap-2.5">
               {groups.map((group) => (
-                <View key={group.name} className="flex-1">
+                <View key={group.id} className="flex-1">
                   <GlassShell radius={24} blurTarget={backgroundRef}>
-                    <TouchableOpacity activeOpacity={0.9} className="p-3.5">
+                    <TouchableOpacity
+                      activeOpacity={0.9}
+                      className="p-3.5"
+                      accessibilityRole="button"
+                      accessibilityLabel={`Open ${group.name}`}
+                      onPress={() => {
+                        // Missing id: stay put instead of opening the
+                        // wrong group. IDs always come from the backend.
+                        if (!group.id) return;
+                        router.push(`/(tabs)/groups/${group.id}` as any);
+                      }}
+                    >
                       <View className="flex-row items-center">
                         <View
                           className="h-[52px] w-[52px] items-center justify-center rounded-full border border-white/30"
@@ -1042,9 +1099,28 @@ export default function Home() {
                   </View>
                 ) : (
                 expenses.map((expense, index) => (
-                  <View
-                    key={expense.title}
+                  <TouchableOpacity
+                    key={expense.id}
+                    activeOpacity={0.7}
                     className="flex-row items-center py-3"
+                    accessibilityRole="button"
+                    accessibilityLabel={`Open ${expense.title}`}
+                    onPress={() => {
+                      // Missing id: stay put instead of opening the
+                      // wrong record. The `ts` nonce forces the Activity
+                      // tab to consume every tap, even repeat taps on the
+                      // same expense.
+                      if (!expense.id) return;
+                      router.push(
+                        {
+                          pathname: '/(tabs)/activity',
+                          params: {
+                            activityId: expense.id,
+                            ts: String(Date.now()),
+                          },
+                        } as any,
+                      );
+                    }}
                     style={
                       index < expenses.length - 1
                         ? {
@@ -1108,7 +1184,7 @@ export default function Home() {
                         </Text>
                       </View>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 ))
                 )}
               </View>

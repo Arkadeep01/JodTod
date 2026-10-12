@@ -30,6 +30,17 @@ export default function ScanJoinQR() {
     scannedRef.current = false;
   };
 
+  // Cold-link entry has no history to pop: fall back to the tabs root
+  // instead of leaving Cancel/close as dead-end no-ops. Same house
+  // pattern as currency-selection / SupportForm.
+  const goBackOrTabs = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)' as any);
+    }
+  };
+
   if (!permission) {
     return <View style={{ flex: 1, backgroundColor: '#000' }} />;
   }
@@ -41,7 +52,7 @@ export default function ScanJoinQR() {
           <View className="flex-row items-center px-4 pb-2 pt-1">
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => router.back()}
+              onPress={goBackOrTabs}
               className="h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10"
             >
               <Ionicons name="close" size={20} color="#FFFFFF" />
@@ -67,7 +78,7 @@ export default function ScanJoinQR() {
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.back()}
+              onPress={goBackOrTabs}
               className="mt-2.5 w-full items-center rounded-2xl border border-white/20 bg-white/10 py-3.5"
             >
               <Text className="text-[15px] font-bold text-white">Cancel</Text>
@@ -90,7 +101,7 @@ export default function ScanJoinQR() {
         <View className="flex-row items-center px-4 pb-2 pt-1" pointerEvents="box-none">
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => router.back()}
+            onPress={goBackOrTabs}
             className="h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/50"
           >
             <Ionicons name="close" size={20} color="#FFFFFF" />
@@ -143,7 +154,7 @@ export default function ScanJoinQR() {
         <View className="items-center pb-6" pointerEvents="box-none">
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => router.back()}
+            onPress={goBackOrTabs}
             className="rounded-full border border-white/30 bg-black/50 px-8 py-3"
           >
             <Text className="text-[14px] font-bold text-white">Cancel</Text>

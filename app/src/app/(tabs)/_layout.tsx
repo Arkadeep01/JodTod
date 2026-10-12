@@ -29,24 +29,21 @@ function shouldHideTabBar(routeName: string | undefined) {
   return false;
 }
 
-// Tab order for directional slide transitions: Home 0, Groups 1, Activity 2, Notifications 3, Settle 4.
+// Tab order for directional slide transitions: Home 0, Groups 1, Activity 2, Settle 3.
 function tabPositionFromSegments(segments: readonly string[]) {
   if (segments.includes('groups')) return 1;
   if (segments.includes('activity')) return 2;
-  if (segments.includes('notifications')) return 3;
-  if (segments.includes('settle')) return 4;
+  if (segments.includes('settle')) return 3;
   return 0;
 }
 
 function CustomTabBar({ state, navigation, onAddActionPress, blurTarget, sheetOpen }: any) {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const tabs = [
     { name: 'index', label: 'Home', icon: 'home' },
     { name: 'groups/index', label: 'Groups', icon: 'people' },
     { name: 'activity', label: 'Activity', icon: 'receipt-outline' },
-    { name: 'notifications', label: 'Notifications', icon: 'notifications' },
     { name: 'settle', label: 'Settle', icon: 'paper-plane' },
   ];
 
@@ -70,8 +67,6 @@ function CustomTabBar({ state, navigation, onAddActionPress, blurTarget, sheetOp
   if (shouldHideTabBar(focusedRouteName)) {
     return null;
   }
-
-  const isHomeScreen = focusedRouteName === 'index';
 
   const renderTab = (tab: any) => {
     const routeIndex = state.routes.findIndex((route: any) => route.name === tab.name);
@@ -109,11 +104,10 @@ function CustomTabBar({ state, navigation, onAddActionPress, blurTarget, sheetOp
   };
 
   const handleAddButtonPress = () => {
-    if (isHomeScreen) {
-      onAddActionPress();
-    } else {
-      router.push('/add-expense' as any);
-    }
+    // The "+" tab always opens the action menu, from every tab.
+    // It must never navigate directly (previously non-Home tabs pushed
+    // /add-expense here, bypassing the menu entirely).
+    onAddActionPress();
   };
 
   const handlePlusPressIn = () => {
@@ -179,12 +173,11 @@ function CustomTabBar({ state, navigation, onAddActionPress, blurTarget, sheetOp
         <View className="h-[80px] flex-row items-center px-2">
           <View className="flex-1">{renderTab(tabs[0])}</View>
           <View className="flex-1">{renderTab(tabs[1])}</View>
-          <View className="flex-1">{renderTab(tabs[2])}</View>
 
           <View className="w-[64px]" />
 
+          <View className="flex-1">{renderTab(tabs[2])}</View>
           <View className="flex-1">{renderTab(tabs[3])}</View>
-          <View className="flex-1">{renderTab(tabs[4])}</View>
         </View>
 
         <Animated.View
@@ -283,7 +276,8 @@ export default function TabsLayout() {
   }));
 
   const handleAddActionPress = React.useCallback(() => {
-    // Only triggered on Home screen (index)
+    // Triggered from every tab. Boolean state is idempotent: repeated
+    // presses while open are no-ops, so duplicate menus cannot stack.
     setSheetVisible(true);
   }, []);
 
@@ -361,13 +355,12 @@ export default function TabsLayout() {
           <Tabs.Screen name="groups/[id]/invite" options={{ title: 'Invite Members' }} />
           <Tabs.Screen name="groups/[id]/edit" options={{ title: 'Edit Group' }} />
           <Tabs.Screen name="activity" options={{ title: 'Activity' }} />
-          <Tabs.Screen name="notifications" options={{ title: 'Notifications' }} />
           <Tabs.Screen name="settle" options={{ title: 'Settle' }} />
         </Tabs>
         </BlurTargetView>
       </Animated.View>
 
-      {/* Global Add Action Bottom Sheet - shown when "+" pressed on Home screen only */}
+      {/* Global Add Action Bottom Sheet - shown when "+" pressed on any tab */}
       <AddActionBottomSheet
         visible={sheetVisible}
         groupName="Goa Trip"

@@ -14,6 +14,8 @@ interface ProfilePhotoSheetProps {
   uploading: boolean;
   /** Whether a photo exists (controls the Remove row). */
   hasPhoto: boolean;
+  /** Sheet heading — defaults to "Profile photo" (group flow passes its own). */
+  title?: string;
   onTakePhoto: () => void;
   onChooseFromGallery: () => void;
   onRemovePhoto: () => void;
@@ -24,6 +26,7 @@ export function ProfilePhotoSheet({
   visible,
   uploading,
   hasPhoto,
+  title = "Profile photo",
   onTakePhoto,
   onChooseFromGallery,
   onRemovePhoto,
@@ -42,7 +45,7 @@ export function ProfilePhotoSheet({
         <View className="rounded-t-[28px] border border-white/50 bg-white/95 px-5 pb-8 pt-4">
           <View className="mb-4 h-1 w-12 self-center rounded-full bg-black/15" />
           <Text className="mb-4 text-center text-[17px] font-extrabold text-[#0B3D62]">
-            Profile photo
+            {title}
           </Text>
 
           {/* CARD 1 — Camera */}

@@ -66,21 +66,25 @@ export default function Onboarding() {
     setActiveIndex(index);
   };
 
+  // replace (not push): onboarding must not linger beneath the auth
+  // stack, or system Back at the tab root replays these slides after
+  // a successful login (back-navigation audit P0-1). Forward flow is
+  // identical — only the history residue is gone.
   const handleNext = () => {
     if (isLastSlide) {
-      router.push('/login' as any);
+      router.replace('/login' as any);
     } else {
       goToSlide(activeIndex + 1);
     }
   };
 
   const handleSkip = () => {
-    router.push('/login' as any);
+    router.replace('/login' as any);
   };
 
   return (
     <ImageBackground
-      source={require('../../assets/images/jodtod/background_onboarding.png')}
+      source={require('../../assets/images/jodtod/background_home.png')}
       resizeMode="cover"
       className="flex-1"
     >

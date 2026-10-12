@@ -12,6 +12,9 @@ graphify-out/
 .DS_Store
 Thumbs.db
 
+# Local backend run logs (uvicorn stdout/stderr redirects; never commit).
+backend-local*.log
+
 # Python / TypeScript build caches at root level.
 __pycache__/
 *.tsbuildinfo

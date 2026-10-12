@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dimensions, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GradientCTA, LabeledField, colors } from './ui';
 
@@ -40,13 +40,18 @@ export function GroupForm({ initialValues, submitLabel, showCover = 'picker', co
   return (
     <View>
       {showCover === 'picker' ? (
-        <TouchableOpacity
-          activeOpacity={0.8}
+        // Static placeholder art: no cover-upload flow exists (create only
+        // sends name/description), so this must not fake tappability.
+        // Was a pressable with no handler. Restoring onPress needs a real
+        // picker + upload endpoint (product decision — see report).
+        <View
           className="items-center justify-center rounded-3xl border-2 border-dashed mb-6"
           style={{
             height: 140,
             borderColor: colors.inputBorder,
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            // Opaque enough to read "Add Cover Image" over the photo
+            // backdrop (was 20% white, same wash-out as the inputs).
+            backgroundColor: 'rgba(255,255,255,0.55)',
           }}
         >
           <View
@@ -61,7 +66,7 @@ export function GroupForm({ initialValues, submitLabel, showCover = 'picker', co
           <Text className="text-[11px]" style={{ color: colors.textMuted }}>
             (optional)
           </Text>
-        </TouchableOpacity>
+        </View>
       ) : (
         <View
           style={{
@@ -83,13 +88,15 @@ export function GroupForm({ initialValues, submitLabel, showCover = 'picker', co
             }}
             resizeMode="cover"
           />
-          <TouchableOpacity
+          {/* Static badge: changing the cover needs the same missing
+              upload flow (see above). Not a pressable. */}
+          <View
             className="absolute bottom-3 right-3 flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
             style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
           >
             <Ionicons name="camera-outline" size={14} color="#fff" />
             <Text className="text-[11px] font-semibold text-white">Change</Text>
-          </TouchableOpacity>
+          </View>
         </View>
       )}
 

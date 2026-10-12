@@ -55,7 +55,7 @@ const cardShadow = {
 
 const glassBg = { backgroundColor: 'rgba(255,255,255,0.01)' };
 
-const BACKGROUND_IMAGE = require('../../../assets/images/jodtod/background_onboarding.png');
+const BACKGROUND_IMAGE = require('../../../assets/images/jodtod/background_home.png');
 
 function ScreenBackground() {
   return (
@@ -265,6 +265,7 @@ function InfoRow({
 }
 
 function ExpenseDetailContent({ notification }: { notification: BackendNotification }) {
+  const router = useRouter();
   const metadata = metaStrings(notification.metadata);
   
   return (
@@ -336,13 +337,14 @@ function ExpenseDetailContent({ notification }: { notification: BackendNotificat
         <View className="mb-4">
           <GlassCard>
             <Text className="mb-2 text-[13px] font-semibold text-[#5B7C93]">Bill Image</Text>
-            <TouchableOpacity activeOpacity={0.85} className="flex-row items-center justify-between">
+            {/* Static thumbnail: no image-viewer flow exists, so this must
+                not look tappable (was a pressable with no handler). */}
+            <View className="flex-row items-center justify-between">
               <Image
                 source={{ uri: metadata.bill_image }}
                 className="h-14 w-14 rounded-xl"
               />
-              <Ionicons name="chevron-forward" size={18} color={colors.faint} />
-            </TouchableOpacity>
+            </View>
           </GlassCard>
         </View>
       ) : null}
@@ -351,7 +353,7 @@ function ExpenseDetailContent({ notification }: { notification: BackendNotificat
         <View className="mb-4">
           <PrimaryButton
             label="View in Group"
-            onPress={() => {}}
+            onPress={() => router.push(`/(tabs)/groups/${notification.related_group_id}` as any)}
           />
         </View>
       ) : null}
@@ -360,6 +362,7 @@ function ExpenseDetailContent({ notification }: { notification: BackendNotificat
 }
 
 function SettlementDetailContent({ notification }: { notification: BackendNotification }) {
+  const router = useRouter();
   const metadata = metaStrings(notification.metadata);
   
   return (
@@ -409,7 +412,7 @@ function SettlementDetailContent({ notification }: { notification: BackendNotifi
         <View className="mb-4">
           <PrimaryButton
             label="View in Group"
-            onPress={() => {}}
+            onPress={() => router.push(`/(tabs)/groups/${notification.related_group_id}` as any)}
           />
         </View>
       ) : null}
@@ -418,6 +421,7 @@ function SettlementDetailContent({ notification }: { notification: BackendNotifi
 }
 
 function GroupInvitationDetailContent({ notification }: { notification: BackendNotification }) {
+  const router = useRouter();
   const metadata = metaStrings(notification.metadata);
   
   return (
@@ -458,7 +462,7 @@ function GroupInvitationDetailContent({ notification }: { notification: BackendN
         <View className="mb-4">
           <PrimaryButton
             label="View Group"
-            onPress={() => {}}
+            onPress={() => router.push(`/(tabs)/groups/${notification.related_group_id}` as any)}
           />
         </View>
       ) : null}
@@ -467,6 +471,7 @@ function GroupInvitationDetailContent({ notification }: { notification: BackendN
 }
 
 function GroupCommentDetailContent({ notification }: { notification: BackendNotification }) {
+  const router = useRouter();
   const metadata = metaStrings(notification.metadata);
   
   return (
@@ -508,7 +513,7 @@ function GroupCommentDetailContent({ notification }: { notification: BackendNoti
         <View className="mb-4">
           <PrimaryButton
             label="View in Group"
-            onPress={() => {}}
+            onPress={() => router.push(`/(tabs)/groups/${notification.related_group_id}` as any)}
           />
         </View>
       ) : null}
@@ -544,9 +549,12 @@ function TripReportDetailContent({ notification }: { notification: BackendNotifi
         </GlassCard>
       </View>
 
+      {/* No trip-report viewer exists in the app yet: render disabled
+          rather than a button that appears tappable but does nothing. */}
       <View className="mb-4">
         <PrimaryButton
           label="View Report"
+          disabled
           onPress={() => {}}
         />
       </View>
@@ -555,6 +563,7 @@ function TripReportDetailContent({ notification }: { notification: BackendNotifi
 }
 
 function BudgetAlertDetailContent({ notification }: { notification: BackendNotification }) {
+  const router = useRouter();
   const metadata = metaStrings(notification.metadata);
   
   return (
@@ -605,7 +614,7 @@ function BudgetAlertDetailContent({ notification }: { notification: BackendNotif
         <View className="mb-4">
           <PrimaryButton
             label="View Budget"
-            onPress={() => {}}
+            onPress={() => router.push(`/(tabs)/groups/${notification.related_group_id}` as any)}
           />
         </View>
       ) : null}
@@ -614,6 +623,7 @@ function BudgetAlertDetailContent({ notification }: { notification: BackendNotif
 }
 
 function MemberJoinedDetailContent({ notification }: { notification: BackendNotification }) {
+  const router = useRouter();
   const metadata = metaStrings(notification.metadata);
   
   return (
@@ -655,7 +665,7 @@ function MemberJoinedDetailContent({ notification }: { notification: BackendNoti
         <View className="mb-4">
           <PrimaryButton
             label="View Group"
-            onPress={() => {}}
+            onPress={() => router.push(`/(tabs)/groups/${notification.related_group_id}` as any)}
           />
         </View>
       ) : null}
@@ -664,6 +674,7 @@ function MemberJoinedDetailContent({ notification }: { notification: BackendNoti
 }
 
 function BillImageDetailContent({ notification }: { notification: BackendNotification }) {
+  const router = useRouter();
   const metadata = metaStrings(notification.metadata);
   
   return (
@@ -682,13 +693,14 @@ function BillImageDetailContent({ notification }: { notification: BackendNotific
           {metadata.bill_image ? (
             <>
               <Text className="mb-2 text-[13px] font-semibold text-[#5B7C93]">Bill Image</Text>
-              <TouchableOpacity activeOpacity={0.85} className="flex-row items-center justify-between">
+              {/* Static thumbnail: no image-viewer flow exists, so this must
+                  not look tappable (was a pressable with no handler). */}
+              <View className="flex-row items-center justify-between">
                 <Image
                   source={{ uri: metadata.bill_image }}
                   className="h-14 w-14 rounded-xl"
                 />
-                <Ionicons name="chevron-forward" size={18} color={colors.faint} />
-              </TouchableOpacity>
+              </View>
             </>
           ) : null}
         </GlassCard>
@@ -698,7 +710,7 @@ function BillImageDetailContent({ notification }: { notification: BackendNotific
         <View className="mb-4">
           <PrimaryButton
             label="View in Group"
-            onPress={() => {}}
+            onPress={() => router.push(`/(tabs)/groups/${notification.related_group_id}` as any)}
           />
         </View>
       ) : null}
@@ -707,6 +719,7 @@ function BillImageDetailContent({ notification }: { notification: BackendNotific
 }
 
 function GroupSettingsDetailContent({ notification }: { notification: BackendNotification }) {
+  const router = useRouter();
   const metadata = metaStrings(notification.metadata);
   
   return (
@@ -739,7 +752,7 @@ function GroupSettingsDetailContent({ notification }: { notification: BackendNot
         <View className="mb-4">
           <PrimaryButton
             label="View Group Settings"
-            onPress={() => {}}
+            onPress={() => router.push(`/(tabs)/groups/${notification.related_group_id}` as any)}
           />
         </View>
       ) : null}
@@ -766,10 +779,13 @@ function SystemDetailContent({ notification }: { notification: BackendNotificati
         </GlassCard>
       </View>
 
+      {/* metadata.action_url is an opaque backend string with no registered
+          in-app handler: render disabled rather than a dead button. */}
       {metadata.action_url ? (
         <View className="mb-4">
           <PrimaryButton
             label={metadata.action_label ?? 'Open'}
+            disabled
             onPress={() => {}}
           />
         </View>
@@ -791,7 +807,6 @@ export default function NotificationDetailScreen() {
   const [notification, setNotification] = useState<BackendNotification | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
 
   const loadNotification = useCallback(async () => {
     if (!id) return;
@@ -815,7 +830,13 @@ export default function NotificationDetailScreen() {
   }, [loadNotification]);
 
   const handleBack = useCallback(() => {
-    router.back();
+    // Cold-link entry (notification tap with no history) has nothing to
+    // pop: fall back to the list instead of a dead-end no-op.
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/notifications' as any);
+    }
   }, [router]);
 
   if (!notification) {
@@ -843,7 +864,7 @@ export default function NotificationDetailScreen() {
               </Text>
               <TouchableOpacity
                 activeOpacity={0.85}
-                onPress={() => setAttempt((n) => n + 1)}
+                onPress={() => void loadNotification()}
                 className="mt-5 items-center rounded-full bg-[#149C73] px-6 py-3"
               >
                 <Text className="text-[14px] font-extrabold text-white">Retry</Text>

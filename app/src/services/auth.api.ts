@@ -469,7 +469,11 @@ async function authRequest<T>(
       );
     }
 
-    console.error('Auth API Network Error:', error);
+    // Single dev-only diagnostic: the AuthError thrown below already
+    // carries NETWORK_ERROR to the UI. Never log request bodies/tokens.
+    if (__DEV__) {
+      console.warn('[auth.api] network error:', path, method);
+    }
 
     throw new AuthError(
       "Could not reach the authentication server. Check your connection and that the backend is running.",
@@ -516,10 +520,12 @@ async function authRequest<T>(
   const payload = await parseJsonSafe(response);
 
   if (!response.ok) {
-    console.error('Auth API Response Error:', {
-      status: response.status,
-      statusText: response.statusText,
-    });
+    // Single dev-only diagnostic per failed request (path + status only —
+    // never payloads, tokens, or headers). Expected user errors such as
+    // invalid login credentials stay out of release logs entirely.
+    if (__DEV__) {
+      console.warn('[auth.api] request failed:', method, path, response.status);
+    }
 
     /**
      * Login gets a UI-friendly invalid-credentials error.

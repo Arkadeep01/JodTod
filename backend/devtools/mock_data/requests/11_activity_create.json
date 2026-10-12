@@ -1,0 +1,8 @@
+{
+  "type": "expense",
+  "title": "Manual activity",
+  "subtitle": "Created during verification",
+  "amount": "Rs 100",
+  "group_name": "Goa Trip 2026",
+  "description": "POST /api/activities check."
+}

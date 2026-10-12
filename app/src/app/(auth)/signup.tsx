@@ -73,14 +73,13 @@ function GlassCard({
       ]}
     >
       {/*
-        Plain BlurView on Android silently ignores `intensity` unless you
-        pass experimentalBlurMethod — without it Android renders a flat
-        solid tint instead of an actual blur, making the card look white.
+        Legacy BlurView path (no blurMethod): the dimezis methods require
+        a configured blurTarget and warn + fall back to "none" without one,
+        so a static auth card uses the plain supported blur instead.
       */}
       <BlurView
         intensity={14}
         tint="light"
-        experimentalBlurMethod="dimezisBlurView"
         style={{ borderRadius: radius }}
       >
         {/* soft sky/green tint instead of flat white so bubbles read through in color */}
@@ -263,7 +262,7 @@ function SocialButton({
 function BubbleBackdrop({ children }: { children: ReactNode }) {
   return (
     <ImageBackground
-      source={require('../../../assets/images/jodtod/background_onboarding.png')}
+      source={require('../../../assets/images/jodtod/background_home.png')}
       resizeMode="cover"
       style={{ flex: 1, width: SCREEN_W }}
     >

@@ -1,0 +1,10 @@
+{
+  "group_id": "${GROUP_ID}",
+  "title": "Airport cab",
+  "amount": "800.00",
+  "payer_user_id": "${PAYER_USER_ID}",
+  "split_type": "equal",
+  "participant_ids": ["${USER_ID_1}", "${USER_ID_2}"],
+  "splits": [],
+  "description": "Equal split verified via API."
+}

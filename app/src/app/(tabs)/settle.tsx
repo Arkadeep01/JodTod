@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import { PageTitle } from '../../components/ui/PageTitle';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { resolvePhotoUrl } from '../../services/profile.api';
@@ -62,7 +63,7 @@ const cardShadow = {
 
 const glassBg = { backgroundColor: 'rgba(255,255,255,0.01)' };
 
-const BACKGROUND_IMAGE = require('../../../assets/images/jodtod/background_onboarding.png');
+const BACKGROUND_IMAGE = require('../../../assets/images/jodtod/background_home.png');
 
 function ScreenBackground() {
   return (
@@ -352,11 +353,8 @@ function MainScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
     <View className="flex-1">
       <ScreenBackground />
       <SafeAreaView edges={['top']} className="flex-1">
-        <View className="px-5 pb-3 pt-6">
-          <View className="self-start overflow-hidden rounded-2xl">
-            <View className="absolute inset-0 bg-white/55" />
-            <Text className="px-3 py-1.5 text-[26px] font-extrabold text-[#0B3D62]">Settle</Text>
-          </View>
+        <View className="px-5 pb-3 pt-5">
+          <PageTitle>Settle</PageTitle>
         </View>
 
         <View className="mx-5 mb-3 rounded-full" style={[cardShadow, glassBg]}>

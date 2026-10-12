@@ -1,0 +1,23 @@
+[
+  {
+    "question": "How do I create a group?",
+    "answer": "Open Groups, tap the plus button, choose Create Group, name it, and add members.",
+    "category": "groups",
+    "display_order": 1,
+    "is_active": true
+  },
+  {
+    "question": "How do settlements work?",
+    "answer": "A payer marks a payment as made; the receiver confirms it before the balance changes.",
+    "category": "settlements",
+    "display_order": 2,
+    "is_active": true
+  },
+  {
+    "question": "Is my data backed up?",
+    "answer": "Yes. Your account data is stored securely on JodTod servers.",
+    "category": "general",
+    "display_order": 3,
+    "is_active": true
+  }
+]

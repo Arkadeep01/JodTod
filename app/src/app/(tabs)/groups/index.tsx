@@ -8,6 +8,7 @@ import { BubbleBackdrop, GlassLayers, cardShadow, colors } from '@/components/gr
 import { FilterTabs } from '@/components/groups/FilterTabs';
 import { GroupCard } from '@/components/groups/GroupCard';
 import { EmptyState } from '@/components/groups/EmptyState';
+import { PageTitle } from '@/components/ui/PageTitle';
 import { fetchMyGroups, type GroupSummary } from '@/services/groups.api';
 import type { Group } from '@/lib/groupAdapters';
 
@@ -100,7 +101,8 @@ export default function GroupsList() {
   return (
     <BubbleBackdrop>
       <View className="flex-1 px-5" style={{ paddingTop: insets.top + 14 }}>
-        <View className="flex-row items-center justify-end mb-4">
+        <View className="mb-4 flex-row items-center justify-between">
+          <PageTitle>Groups</PageTitle>
           <TouchableOpacity
             onPress={() => router.push('/(tabs)/groups/create' as any)}
             activeOpacity={0.9}

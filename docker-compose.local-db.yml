@@ -1,0 +1,21 @@
+services:
+  jodtod-postgres-local:
+    image: postgres:16
+    container_name: jodtod-postgres-local
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jodtod_local
+      POSTGRES_USER: jodtod_dev
+      POSTGRES_PASSWORD: ${JODTOD_LOCAL_DB_PASSWORD:?Set local password}
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - jodtod_local_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jodtod_dev -d jodtod_local"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  jodtod_local_pgdata:

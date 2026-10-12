@@ -1,0 +1,30 @@
+[
+  {
+    "invitee": "guest",
+    "group_name": "Goa Trip 2026",
+    "invite_code": "GOA2026SEED",
+    "invited_by": "Avery Sharma",
+    "status": "pending"
+  },
+  {
+    "invitee": "rohan",
+    "group_name": "Yoga Retreat April",
+    "invite_code": "YOGAAPR001",
+    "invited_by": "Priya Nair",
+    "status": "pending"
+  },
+  {
+    "invitee": "priya",
+    "group_name": "Hostel Block C (closed)",
+    "invite_code": "HOSTELOLD1",
+    "invited_by": "Rohan Mehta",
+    "status": "declined"
+  },
+  {
+    "invitee": "arkadeep",
+    "group_name": "Goa Trip 2026",
+    "invite_code": "GOA2026SEED",
+    "invited_by": "Avery Sharma",
+    "status": "pending"
+  }
+]

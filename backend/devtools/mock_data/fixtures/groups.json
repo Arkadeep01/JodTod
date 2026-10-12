@@ -1,0 +1,79 @@
+[
+  {
+    "key": "goa_trip",
+    "name": "Goa Trip 2026",
+    "description": "Beach trip with friends - flights, stay, food.",
+    "group_type": "trip",
+    "currency": "INR",
+    "image_url": null,
+    "lifecycle": "active",
+    "invite_code": "GOA2026SEED",
+    "created_by": "avery",
+    "members": [
+      { "user": "avery", "role": "admin" },
+      { "user": "rohan", "role": "member" },
+      { "user": "priya", "role": "member" }
+    ]
+  },
+  {
+    "key": "flat_rent",
+    "name": "Flat 12B Rent",
+    "description": "Monthly rent + utilities split.",
+    "group_type": "rent",
+    "currency": "INR",
+    "image_url": null,
+    "lifecycle": "active",
+    "invite_code": "FLAT12BSEED",
+    "created_by": "avery",
+    "members": [
+      { "user": "avery", "role": "admin" },
+      { "user": "rohan", "role": "member" }
+    ]
+  },
+  {
+    "key": "food_mess",
+    "name": "Mess Food Fund",
+    "description": "Shared grocery and mess fund.",
+    "group_type": "food",
+    "currency": "INR",
+    "image_url": null,
+    "lifecycle": "active",
+    "invite_code": "MESSFUND01",
+    "created_by": "rohan",
+    "members": [
+      { "user": "rohan", "role": "admin" },
+      { "user": "priya", "role": "member" }
+    ]
+  },
+  {
+    "key": "hostel_old",
+    "name": "Hostel Block C (closed)",
+    "description": "Archived: old hostel expenses.",
+    "group_type": "hostel",
+    "currency": "INR",
+    "image_url": null,
+    "lifecycle": "archived",
+    "invite_code": "HOSTELOLD1",
+    "created_by": "rohan",
+    "members": [
+      { "user": "rohan", "role": "admin" },
+      { "user": "priya", "role": "member" }
+    ]
+  },
+  {
+    "key": "office_lunch",
+    "name": "Office Lunch Squad",
+    "description": "Weekday lunches and coffee runs near the office.",
+    "group_type": "food",
+    "currency": "INR",
+    "image_url": null,
+    "lifecycle": "active",
+    "invite_code": "OFFICELSQ01",
+    "created_by": "arkadeep",
+    "members": [
+      { "user": "arkadeep", "role": "admin" },
+      { "user": "rohan", "role": "member" },
+      { "user": "priya", "role": "member" }
+    ]
+  }
+]

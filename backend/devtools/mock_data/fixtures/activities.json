@@ -1,0 +1,211 @@
+[
+  {
+    "user": "avery",
+    "type": "expense",
+    "title": "Beach shack dinner",
+    "subtitle": "You paid for Goa Trip 2026",
+    "amount": "Rs 3,600",
+    "occurred_at_offset_hours": -72,
+    "member_key": "avery",
+    "group_name": "Goa Trip 2026",
+    "actor_name": "Avery Sharma",
+    "counterparty_name": null,
+    "category": "Food",
+    "status": "settled",
+    "description": "Dinner at Curlies.",
+    "split_type": "Equal",
+    "split_among": "3 people",
+    "each_share": "Rs 1,200",
+    "participants": [
+      { "name": "Avery Sharma", "share": "Rs 1,200" },
+      { "name": "Rohan Mehta", "share": "Rs 1,200" },
+      { "name": "Priya Nair", "share": "Rs 1,200" }
+    ]
+  },
+  {
+    "user": "avery",
+    "type": "settlement",
+    "title": "Rohan paid you",
+    "subtitle": "Confirmed settlement in Flat 12B Rent",
+    "amount": "Rs 5,000",
+    "occurred_at_offset_hours": -96,
+    "member_key": "rohan",
+    "group_name": "Flat 12B Rent",
+    "actor_name": "Rohan Mehta",
+    "counterparty_name": "Rohan Mehta",
+    "status": "paid",
+    "description": "Part payment towards February rent."
+  },
+  {
+    "user": "avery",
+    "type": "member",
+    "title": "Rohan joined Flat 12B Rent",
+    "subtitle": "New member",
+    "occurred_at_offset_hours": -240,
+    "member_key": "rohan",
+    "group_name": "Flat 12B Rent",
+    "actor_name": "Rohan Mehta",
+    "status": "joined"
+  },
+  {
+    "user": "avery",
+    "type": "group",
+    "title": "Flat 12B Rent updated",
+    "subtitle": "Description changed",
+    "occurred_at_offset_hours": -216,
+    "group_name": "Flat 12B Rent",
+    "status": "updated"
+  },
+  {
+    "user": "rohan",
+    "type": "expense",
+    "title": "Scooter rental",
+    "subtitle": "You paid for Goa Trip 2026",
+    "amount": "Rs 1,500",
+    "occurred_at_offset_hours": -48,
+    "member_key": "rohan",
+    "group_name": "Goa Trip 2026",
+    "actor_name": "Rohan Mehta",
+    "category": "Travel",
+    "status": "settled",
+    "split_type": "Equal",
+    "split_among": "2 people",
+    "each_share": "Rs 750",
+    "participants": [
+      { "name": "Rohan Mehta", "share": "Rs 750" },
+      { "name": "Priya Nair", "share": "Rs 750" }
+    ]
+  },
+  {
+    "user": "rohan",
+    "type": "expense",
+    "title": "Electricity + water",
+    "subtitle": "You paid for Flat 12B Rent",
+    "amount": "Rs 4,000",
+    "occurred_at_offset_hours": -120,
+    "member_key": "rohan",
+    "group_name": "Flat 12B Rent",
+    "actor_name": "Rohan Mehta",
+    "category": "Utilities",
+    "status": "pending",
+    "split_type": "Equal",
+    "split_among": "2 people",
+    "each_share": "Rs 2,000",
+    "participants": [
+      { "name": "Avery Sharma", "share": "Rs 2,000" },
+      { "name": "Rohan Mehta", "share": "Rs 2,000" }
+    ]
+  },
+  {
+    "user": "rohan",
+    "type": "settlement",
+    "title": "You marked Rs 5,000 paid",
+    "subtitle": "Confirmed by Avery Sharma",
+    "amount": "Rs 5,000",
+    "occurred_at_offset_hours": -96,
+    "member_key": "avery",
+    "group_name": "Flat 12B Rent",
+    "counterparty_name": "Avery Sharma",
+    "status": "paid"
+  },
+  {
+    "user": "rohan",
+    "type": "member",
+    "title": "Priya joined Mess Food Fund",
+    "subtitle": "New member",
+    "occurred_at_offset_hours": -144,
+    "member_key": "priya",
+    "group_name": "Mess Food Fund",
+    "actor_name": "Priya Nair",
+    "status": "joined"
+  },
+  {
+    "user": "priya",
+    "type": "expense",
+    "title": "Groceries",
+    "subtitle": "You paid for Mess Food Fund",
+    "amount": "Rs 900",
+    "occurred_at_offset_hours": -24,
+    "member_key": "priya",
+    "group_name": "Mess Food Fund",
+    "actor_name": "Priya Nair",
+    "category": "Food",
+    "status": "pending",
+    "split_type": "Equal",
+    "split_among": "2 people",
+    "each_share": "Rs 450",
+    "participants": [
+      { "name": "Rohan Mehta", "share": "Rs 450" },
+      { "name": "Priya Nair", "share": "Rs 450" }
+    ]
+  },
+  {
+    "user": "priya",
+    "type": "settlement",
+    "title": "Payment pending confirmation",
+    "subtitle": "You marked Rs 500 paid to Avery Sharma",
+    "amount": "Rs 500",
+    "occurred_at_offset_hours": -24,
+    "member_key": "avery",
+    "group_name": "Goa Trip 2026",
+    "counterparty_name": "Avery Sharma",
+    "status": "pending"
+  },
+  {
+    "user": "priya",
+    "type": "member",
+    "title": "You joined Goa Trip 2026",
+    "subtitle": "Welcome to the group",
+    "occurred_at_offset_hours": -168,
+    "member_key": "priya",
+    "group_name": "Goa Trip 2026",
+    "status": "joined"
+  },
+  {
+    "user": "arkadeep",
+    "type": "expense",
+    "title": "Team lunch",
+    "subtitle": "You paid for Office Lunch Squad",
+    "amount": "Rs 2,400",
+    "occurred_at_offset_hours": -24,
+    "member_key": "arkadeep",
+    "group_name": "Office Lunch Squad",
+    "actor_name": "Arkadeep",
+    "category": "Food",
+    "status": "settled",
+    "description": "Lunch at the cafe.",
+    "split_type": "Equal",
+    "split_among": "3 people",
+    "each_share": "Rs 800",
+    "participants": [
+      { "name": "Arkadeep", "share": "Rs 800" },
+      { "name": "Rohan Mehta", "share": "Rs 800" },
+      { "name": "Priya Nair", "share": "Rs 800" }
+    ]
+  },
+  {
+    "user": "arkadeep",
+    "type": "settlement",
+    "title": "Rohan paid you",
+    "subtitle": "Confirmed settlement in Office Lunch Squad",
+    "amount": "Rs 500",
+    "occurred_at_offset_hours": -18,
+    "member_key": "rohan",
+    "group_name": "Office Lunch Squad",
+    "actor_name": "Rohan Mehta",
+    "counterparty_name": "Rohan Mehta",
+    "status": "paid",
+    "description": "Settled lunch share."
+  },
+  {
+    "user": "arkadeep",
+    "type": "member",
+    "title": "Priya joined Office Lunch Squad",
+    "subtitle": "New member",
+    "occurred_at_offset_hours": -48,
+    "member_key": "priya",
+    "group_name": "Office Lunch Squad",
+    "actor_name": "Priya Nair",
+    "status": "joined"
+  }
+]

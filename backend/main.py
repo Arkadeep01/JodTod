@@ -115,6 +115,7 @@ app.add_middleware(
 UPLOAD_DIR = Path(__file__).resolve().parent / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 (UPLOAD_DIR / "profile_photos").mkdir(parents=True, exist_ok=True)
+(UPLOAD_DIR / "group_photos").mkdir(parents=True, exist_ok=True)
 
 app.mount(
     "/uploads",

@@ -1,0 +1,64 @@
+[
+  {
+    "key": "avery",
+    "name": "Avery Sharma",
+    "username": "avery.sharma",
+    "email": "avery@jodtod.test",
+    "phone": "+919000000001",
+    "email_verified": true,
+    "phone_verified": true,
+    "account_status": "active",
+    "google_subject": "seed-google-subject-avery",
+    "google_email": "avery@jodtod.test",
+    "avatar_url": null
+  },
+  {
+    "key": "rohan",
+    "name": "Rohan Mehta",
+    "username": "rohan.mehta",
+    "email": "rohan@jodtod.test",
+    "phone": "+919000000002",
+    "email_verified": true,
+    "phone_verified": true,
+    "account_status": "active",
+    "google_subject": null,
+    "google_email": null,
+    "avatar_url": null
+  },
+  {
+    "key": "priya",
+    "name": "Priya Nair",
+    "username": "priya.nair",
+    "email": "priya@jodtod.test",
+    "phone": "+919000000003",
+    "email_verified": true,
+    "phone_verified": true,
+    "account_status": "active",
+    "apple_subject": "seed-apple-subject-priya",
+    "apple_email": "priya@jodtod.test",
+    "avatar_url": null
+  },
+  {
+    "key": "guest",
+    "name": "Guest Pending",
+    "username": "guest.pending",
+    "email": "guest@jodtod.test",
+    "phone": "+919000000004",
+    "email_verified": false,
+    "phone_verified": false,
+    "account_status": "pending",
+    "avatar_url": null
+  },
+  {
+    "key": "arkadeep",
+    "name": "Arkadeep",
+    "username": "arkadeep",
+    "email": "arkadeep@admin.com",
+    "phone": "+919000000005",
+    "email_verified": true,
+    "phone_verified": true,
+    "account_status": "active",
+    "password_env": "JODTOD_DEMO_ADMIN_PASSWORD",
+    "avatar_url": null
+  }
+]

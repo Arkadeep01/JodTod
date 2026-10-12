@@ -203,7 +203,7 @@ export default function ForgotPassword() {
 
   return (
     <ImageBackground
-      source={require("../../../assets/images/jodtod/background_onboarding.png")}
+      source={require("../../../assets/images/jodtod/background_home.png")}
       resizeMode="cover"
       style={{ flex: 1, width: SCREEN_W }}
     >

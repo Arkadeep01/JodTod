@@ -175,8 +175,9 @@ export default function EditGroup() {
               multiline
             />
 
+            {/* Error box: 70% white so it stays legible over the photo backdrop (same fix as Create). */}
             {error ? (
-              <View className="mt-3 rounded-2xl border border-red-300/50 bg-white/50 px-4 py-3">
+              <View className="mt-3 rounded-2xl border border-red-300/50 bg-white/70 px-4 py-3">
                 <Text className="text-center text-[13px] font-medium text-red-600">
                   {error}
                 </Text>

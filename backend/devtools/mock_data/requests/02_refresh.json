@@ -1,0 +1,4 @@
+{
+  "refresh_token": "${REFRESH_TOKEN}",
+  "session_id": "${SESSION_ID}"
+}

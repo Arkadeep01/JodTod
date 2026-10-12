@@ -12,6 +12,8 @@
  *   GET  /api/groups/search/by-code?code=
  *   GET  /api/groups/{group_id}
  *   PATCH /api/groups/{group_id}
+ *   POST /api/groups/{group_id}/photo
+ *   DELETE /api/groups/{group_id}/photo
  *   POST /api/groups/{group_id}/members
  *   DELETE /api/groups/{group_id}/members/me
  *   POST /api/groups/{group_id}/archive
@@ -363,6 +365,89 @@ export async function updateGroup(
       body: JSON.stringify(body),
     }),
   );
+}
+
+export interface PickedGroupPhoto {
+  uri: string;
+  fileName: string;
+  mimeType: string;
+}
+
+/**
+ * POST /api/groups/{group_id}/photo — upload/replace the group photo
+ * (admins only; 403 otherwise). Mirrors the profile-photo upload: React
+ * Native FormData file part, backend reads it as `photo: UploadFile`.
+ * Returns the persisted image_url (relative `/uploads/...` reference).
+ */
+export async function uploadGroupPhoto(
+  groupId: string,
+  photo: PickedGroupPhoto,
+): Promise<string | null> {
+  const headers = await getAuthorizationHeader();
+  const form = new FormData();
+  form.append("photo", {
+    uri: photo.uri,
+    name: photo.fileName,
+    type: photo.mimeType,
+  } as unknown as Blob);
+
+  let response: Response;
+  try {
+    response = await fetch(
+      `${API_V1_BASE_URL}/groups/${encodeURIComponent(groupId)}/photo`,
+      {
+        method: "POST",
+        headers: { ...headers },
+        body: form,
+      },
+    );
+  } catch (error) {
+    throw new GroupsApiError(
+      error instanceof Error ? error.message : "Network request failed.",
+      null,
+    );
+  }
+  if (!response.ok) {
+    const { detail, code } = await parseError(response);
+    throw new GroupsApiError(
+      detail ?? `Group photo upload failed with status ${response.status}.`,
+      response.status,
+      code ?? null,
+    );
+  }
+  const body = (await response.json()) as { image_url?: unknown };
+  return typeof body.image_url === "string" ? body.image_url : null;
+}
+
+/**
+ * DELETE /api/groups/{group_id}/photo — remove the group photo
+ * (admins only). Safe when no photo exists.
+ */
+export async function removeGroupPhoto(groupId: string): Promise<void> {
+  const headers = await getAuthorizationHeader();
+  let response: Response;
+  try {
+    response = await fetch(
+      `${API_V1_BASE_URL}/groups/${encodeURIComponent(groupId)}/photo`,
+      {
+        method: "DELETE",
+        headers: { ...headers },
+      },
+    );
+  } catch (error) {
+    throw new GroupsApiError(
+      error instanceof Error ? error.message : "Network request failed.",
+      null,
+    );
+  }
+  if (!response.ok) {
+    const { detail, code } = await parseError(response);
+    throw new GroupsApiError(
+      detail ?? `Group photo removal failed with status ${response.status}.`,
+      response.status,
+      code ?? null,
+    );
+  }
 }
 
 export interface AddedGroupMember {

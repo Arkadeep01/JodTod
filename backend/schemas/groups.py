@@ -131,6 +131,11 @@ class LeaveGroupResponse(BaseModel):
     status: str
 
 
+class GroupPhotoResponse(BaseModel):
+    id: UUID
+    image_url: Optional[str] = None
+
+
 def money_str(value: Decimal | int | str) -> str:
     if isinstance(value, Decimal):
         quantized = value.quantize(Decimal("0.01"))

@@ -8,13 +8,13 @@ is membership-scoped: groups the user does not belong to read as 404.
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.database import get_db
 from backend.dependencies.auth import get_current_user
-from backend.models.group import GroupLifecycle, GroupMember
+from backend.models.group import Group, GroupLifecycle, GroupMember, MemberRole
 from backend.models.user import User
 from backend.schemas.groups import (
     AddMemberRequest,
@@ -23,6 +23,7 @@ from backend.schemas.groups import (
     GroupDetailResponse,
     GroupListResponse,
     GroupMemberResponse,
+    GroupPhotoResponse,
     GroupSummaryResponse,
     InviteCodeResponse,
     JoinGroupRequest,
@@ -40,6 +41,12 @@ from backend.services.balance_service import (
     money,
     quantize,
     suggest_payments,
+)
+from backend.services.group_photo_service import (
+    GroupPhotoService,
+    GroupPhotoStorageError,
+    GroupPhotoTooLargeError,
+    InvalidGroupPhotoError,
 )
 from backend.services.group_service import (
     GroupNotFoundError,
@@ -275,6 +282,81 @@ async def update_group(
         lifecycle=group.lifecycle.value,
         invite_code=group.invite_code,
     )
+
+
+async def _require_group_admin(
+    db: AsyncSession,
+    user_id: UUID,
+    group_id: UUID,
+) -> Group:
+    """Return the group when the user is an admin; 404/403 otherwise."""
+    try:
+        membership = await GroupService.require_membership(
+            db, user_id, group_id
+        )
+    except GroupNotFoundError as exc:
+        raise _not_found(exc) from exc
+    if membership.role != MemberRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only a group admin can edit the group.",
+        )
+    group = await db.get(Group, group_id)
+    if group is None:
+        raise _not_found(GroupNotFoundError("Group not found."))
+    return group
+
+
+@router.post("/{group_id}/photo", response_model=GroupPhotoResponse)
+async def upload_group_photo(
+    group_id: UUID,
+    identity: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db, use_cache=False),
+    photo: UploadFile = File(...),
+) -> GroupPhotoResponse:
+    """
+    Upload/replace a group's photo (admins only).
+
+    Validates MIME type, extension, and size; stores under a
+    server-generated name; persists the reference on the group;
+    removes the old file only after the new reference commits.
+    """
+    group = await _require_group_admin(db, identity.id, group_id)
+    try:
+        image_url = await GroupPhotoService.set_group_photo(db, group, photo)
+    except GroupPhotoTooLargeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=exc.message,
+        ) from exc
+    except InvalidGroupPhotoError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.message,
+        ) from exc
+    except GroupPhotoStorageError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=exc.message,
+        ) from exc
+    return GroupPhotoResponse(id=group.id, image_url=image_url)
+
+
+@router.delete("/{group_id}/photo", response_model=GroupPhotoResponse)
+async def delete_group_photo(
+    group_id: UUID,
+    identity: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db, use_cache=False),
+) -> GroupPhotoResponse:
+    """
+    Remove a group's photo (admins only).
+
+    Clears the database reference and deletes the stored file when
+    present. Safe when no photo exists.
+    """
+    group = await _require_group_admin(db, identity.id, group_id)
+    await GroupPhotoService.clear_group_photo(db, group)
+    return GroupPhotoResponse(id=group.id, image_url=None)
 
 
 @router.post("/{group_id}/members", response_model=GroupMemberResponse)

@@ -41,7 +41,7 @@ export default function AnimatedIntro({
 
     // Preload ONLY the next screen assets
     Asset.loadAsync([
-      require('../../../assets/images/jodtod/background_onboarding.png'),
+      require('../../../assets/images/jodtod/background_home.png'),
       require('../../../assets/images/jodtod/split-expenses.png'),
       require('../../../assets/images/jodtod/plan-trips.png'),
       require('../../../assets/images/jodtod/settle-up.png'),

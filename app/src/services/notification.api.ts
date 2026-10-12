@@ -60,21 +60,42 @@ export class NotificationApiError extends Error {
   }
 }
 
+async function errorDetail(response: Response): Promise<string> {
+  try {
+    const body = (await response.json()) as { detail?: unknown };
+    if (typeof body.detail === "string" && body.detail) {
+      return `: ${body.detail}`;
+    }
+  } catch {
+    // Non-JSON error body — the status code alone will have to do.
+  }
+  return "";
+}
+
 export async function fetchNotifications(
   params: FetchNotificationsParams = {},
 ): Promise<BackendNotification[]> {
   const headers = await getAuthorizationHeader();
+  // Only send params the caller actually set. The backend treats a
+  // present-but-empty `type` as an unsupported-type value (400) rather
+  // than "no filter", so unconditionally sending `type=` broke the
+  // default "All" list on every load.
   const search = new URLSearchParams();
-  search.set("type", params.type ?? "");
-  if (params.read) search.set("read", params.read);
+  if (params.type) search.set("type", params.type);
+  if (params.read && params.read !== "all") search.set("read", params.read);
   if (params.limit) search.set("limit", String(params.limit));
+
+  const query = search.toString();
+  const url =
+    query.length > 0
+      ? `${API_V1_BASE_URL}/notifications?${query}`
+      : `${API_V1_BASE_URL}/notifications`;
 
   let response: Response;
   try {
-    response = await fetch(
-      `${API_V1_BASE_URL}/notifications?${search.toString()}`,
-      { headers: { ...headers, "Content-Type": "application/json" } },
-    );
+    response = await fetch(url, {
+      headers: { ...headers, "Content-Type": "application/json" },
+    });
   } catch (error) {
     throw new NotificationApiError(
       error instanceof Error ? error.message : "Network request failed.",
@@ -84,7 +105,7 @@ export async function fetchNotifications(
 
   if (!response.ok) {
     throw new NotificationApiError(
-      `Notification request failed with status ${response.status}.`,
+      `Notification request failed with status ${response.status}${await errorDetail(response)}.`,
       response.status,
     );
   }

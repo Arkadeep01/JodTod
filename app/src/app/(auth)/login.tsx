@@ -78,7 +78,6 @@ function GlassCard({
       <BlurView
         intensity={14}
         tint="light"
-        experimentalBlurMethod="dimezisBlurView"
         style={{ borderRadius: radius }}
       >
         <LinearGradient
@@ -346,7 +345,7 @@ function BubbleBackdrop({ children }: { children: ReactNode }) {
 
   return (
     <ImageBackground
-      source={require("../../../assets/images/jodtod/background_onboarding.png")}
+      source={require("../../../assets/images/jodtod/background_home.png")}
       resizeMode="cover"
       style={{
         flex: 1,
@@ -422,18 +421,24 @@ export default function Login() {
 
   const extra = (Constants.expoConfig?.extra ?? manifestExtra) as
     | {
-        googleWebClientId?: string;
-        googleAndroidClientId?: string;
-        googleIosClientId?: string;
+        googleWebClientId?: unknown;
+        googleAndroidClientId?: unknown;
+        googleIosClientId?: unknown;
       }
     | undefined;
 
-  const googleWebClientId = extra?.googleWebClientId;
+  // Expo's config pipeline materializes null extra values as {} on device,
+  // so every extra read is coerced: non-strings count as unset.
+  const asExtraString = (v: unknown): string | undefined =>
+    typeof v === 'string' && v.trim().length > 0 ? v.trim() : undefined;
+
+  const googleWebClientId = asExtraString(extra?.googleWebClientId);
 
   const googleAndroidClientId =
-    extra?.googleAndroidClientId ?? googleWebClientId;
+    asExtraString(extra?.googleAndroidClientId) ?? googleWebClientId;
 
-  const googleIosClientId = extra?.googleIosClientId ?? googleWebClientId;
+  const googleIosClientId =
+    asExtraString(extra?.googleIosClientId) ?? googleWebClientId;
 
   const googleConfigured = Boolean(
     Platform.OS === "android"

@@ -1,0 +1,13 @@
+{
+  "group_id": "${GROUP_ID}",
+  "title": "Unequal dinner",
+  "amount": "1000.00",
+  "payer_user_id": "${PAYER_USER_ID}",
+  "split_type": "custom",
+  "participant_ids": [],
+  "splits": [
+    { "user_id": "${USER_ID_1}", "share_amount": "600.00" },
+    { "user_id": "${USER_ID_2}", "share_amount": "400.00" }
+  ],
+  "description": "Custom (paise-exact) split verified via API."
+}

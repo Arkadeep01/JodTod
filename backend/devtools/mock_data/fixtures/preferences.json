@@ -1,0 +1,34 @@
+[
+  {
+    "user": "avery",
+    "currency": "INR",
+    "date_format": "DD/MM/YYYY",
+    "start_of_week": "monday",
+    "app_language": "en",
+    "display_name": "username"
+  },
+  {
+    "user": "rohan",
+    "currency": "INR",
+    "date_format": "DD/MM/YYYY",
+    "start_of_week": "monday",
+    "app_language": "en",
+    "display_name": "account_name"
+  },
+  {
+    "user": "priya",
+    "currency": "INR",
+    "date_format": "YYYY-MM-DD",
+    "start_of_week": "sunday",
+    "app_language": "en",
+    "display_name": "account_name"
+  },
+  {
+    "user": "arkadeep",
+    "currency": "INR",
+    "date_format": "DD/MM/YYYY",
+    "start_of_week": "monday",
+    "app_language": "en",
+    "display_name": "account_name"
+  }
+]

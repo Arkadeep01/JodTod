@@ -1,0 +1,5 @@
+{
+  "identifier": "avery@jodtod.test",
+  "password": "${JODTOD_SEED_PASSWORD}",
+  "device_id": "seed-device-avery-1"
+}

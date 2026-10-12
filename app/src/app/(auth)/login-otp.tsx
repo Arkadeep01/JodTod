@@ -41,7 +41,7 @@ const INPUT_BORDER = "rgba(255,255,255,0.45)";
 function BubbleBackdrop({ children }: { children: ReactNode }) {
   return (
     <ImageBackground
-      source={require("../../../assets/images/jodtod/background_onboarding.png")}
+      source={require("../../../assets/images/jodtod/background_home.png")}
       resizeMode="cover"
       style={{ flex: 1, width: SCREEN_W }}
     >

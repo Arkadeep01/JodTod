@@ -1,0 +1,29 @@
+[
+  {
+    "user": "avery",
+    "type": "bug",
+    "subject": "Receipt upload fails on Android",
+    "description": "Selecting a photo from gallery closes the sheet without attaching the receipt.",
+    "app_version": "1.0.0",
+    "screen": "add-receipt",
+    "status": "open"
+  },
+  {
+    "user": "avery",
+    "type": "support",
+    "subject": "How do I close a trip?",
+    "description": "I want to archive a finished trip and keep the history visible.",
+    "app_version": "1.0.0",
+    "screen": "groups",
+    "status": "in_progress"
+  },
+  {
+    "user": "priya",
+    "type": "feature_request",
+    "subject": "Add UPI deep links",
+    "description": "Please add a one-tap UPI payment link on the settlement screen.",
+    "app_version": "1.0.0",
+    "screen": "settle",
+    "status": "open"
+  }
+]

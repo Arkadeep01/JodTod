@@ -6,7 +6,6 @@ import Animated, {
   withSpring,
   withTiming,
   Easing,
-  runOnJS,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -71,7 +70,10 @@ function ActionCard({
 
   const handlePressOut = () => {
     pressScale.value = withSpring(1, { damping: 20, stiffness: 200 });
-    runOnJS(onPress)();
+    // NOTE: must NOT call onPress here. The TouchableOpacity `onPress`
+    // prop below already fires it on a valid tap; calling it from
+    // onPressOut as well double-invoked every action (double
+    // router.push → duplicate screens / stale sheet state).
   };
 
   return (
@@ -271,15 +273,20 @@ export default function AddActionBottomSheet({
       className="absolute inset-0 z-50"
       pointerEvents={visible ? 'auto' : 'none'}
     >
+    {/* Backdrop press layer. Sibling of the sheet below (NOT its parent):
+        the sheet used to be nested inside this TouchableOpacity, so taps
+        on action cards bubbled up to handleBackdropPress and the card's
+        own navigation handler never reliably fired. */}
     <TouchableOpacity
       onPress={handleBackdropPress}
       activeOpacity={1}
       className="absolute inset-0"
+      disabled={!visible}
     >
       <Animated.View
         className="absolute inset-0"
         style={[sheetStyles.backdrop, backdropStyle]}
-        pointerEvents="box-none"
+        pointerEvents="none"
       />
 
       {blurTarget && (
@@ -304,6 +311,7 @@ export default function AddActionBottomSheet({
           />
         </Animated.View>
       )}
+    </TouchableOpacity>
 
       <Animated.View
         className="absolute left-0 right-0 bottom-0 overflow-hidden"
@@ -312,7 +320,6 @@ export default function AddActionBottomSheet({
           sheetStyle,
           { borderTopLeftRadius: 24, borderTopRightRadius: 24 },
         ]}
-        pointerEvents="box-only"
       >
         <Animated.View style={[sheetStyles.dragHandleContainer, handleStyle]}>
           <View className="w-10 h-1.5 rounded-full bg-white/50" />
@@ -421,7 +428,6 @@ export default function AddActionBottomSheet({
           </TouchableOpacity>
         </View>
       </Animated.View>
-    </TouchableOpacity>
     </View>
   );
 }

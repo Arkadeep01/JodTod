@@ -1,0 +1,62 @@
+[
+  {
+    "key": "set_flat_rent_rohan",
+    "group": "flat_rent",
+    "payer": "rohan",
+    "receiver": "avery",
+    "amount": "5000.00",
+    "currency": "INR",
+    "status": "paid",
+    "payment_method": "marked_as_paid",
+    "note": "Part payment towards February rent.",
+    "idempotency_key": "seed-set-flat-0001",
+    "initiated_at_offset_days": -4,
+    "confirmed_at_offset_days": -4,
+    "rejection_reason": null
+  },
+  {
+    "key": "set_goa_priya_pending",
+    "group": "goa_trip",
+    "payer": "priya",
+    "receiver": "avery",
+    "amount": "500.00",
+    "currency": "INR",
+    "status": "pending",
+    "payment_method": "marked_as_paid",
+    "note": "Paid my share for dinner.",
+    "idempotency_key": "seed-set-goa-0001",
+    "initiated_at_offset_days": -1,
+    "confirmed_at_offset_days": null,
+    "rejection_reason": null
+  },
+  {
+    "key": "set_food_rohan_rejected",
+    "group": "food_mess",
+    "payer": "rohan",
+    "receiver": "priya",
+    "amount": "300.00",
+    "currency": "INR",
+    "status": "rejected",
+    "payment_method": "marked_as_paid",
+    "note": "Claimed I paid cash.",
+    "idempotency_key": "seed-set-food-0001",
+    "initiated_at_offset_days": -2,
+    "confirmed_at_offset_days": null,
+    "rejection_reason": "Cash was not received."
+  },
+  {
+    "key": "set_office_rohan_arkadeep",
+    "group": "office_lunch",
+    "payer": "rohan",
+    "receiver": "arkadeep",
+    "amount": "500.00",
+    "currency": "INR",
+    "status": "paid",
+    "payment_method": "marked_as_paid",
+    "note": "Settled lunch share.",
+    "idempotency_key": "seed-set-office-0001",
+    "initiated_at_offset_days": -1,
+    "confirmed_at_offset_days": -1,
+    "rejection_reason": null
+  }
+]

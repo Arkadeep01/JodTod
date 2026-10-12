@@ -60,7 +60,7 @@ const cardShadow = {
 
 const glassBg = { backgroundColor: 'rgba(255,255,255,0.01)' };
 
-const BACKGROUND_IMAGE = require('../../../assets/images/jodtod/background_onboarding.png');
+const BACKGROUND_IMAGE = require('../../../assets/images/jodtod/background_home.png');
 
 function ScreenBackground() {
   return (
@@ -373,16 +373,36 @@ export default function NotificationsScreen() {
       <SafeAreaView edges={['top']} className="flex-1">
         <View className="px-5 pb-3 pt-5">
           <View className="flex-row items-center justify-between mb-4">
-            <Text
-              className="text-[28px] font-extrabold text-[#0B3D62]"
-              style={{
-                textShadowColor: 'rgba(255,255,255,0.75)',
-                textShadowRadius: 10,
-                textShadowOffset: { width: 0, height: 1 },
-              }}
-            >
-              Notifications
-            </Text>
+            <View className="flex-row items-center">
+              <TouchableOpacity
+                activeOpacity={0.75}
+                onPress={() => {
+                  // Cold-link entry has no history to pop: fall back to
+                  // the tabs root (same house pattern as scan-join-qr).
+                  if (router.canGoBack()) {
+                    router.back();
+                  } else {
+                    router.replace('/(tabs)' as any);
+                  }
+                }}
+                className="h-10 w-10 items-center justify-center rounded-full border border-white/60 overflow-hidden"
+                style={[cardShadow, glassBg]}
+              >
+                <GlassLayers radius={20} />
+                <View className="absolute inset-0 bg-white/40" />
+                <Ionicons name="chevron-back" size={19} color={colors.navy} />
+              </TouchableOpacity>
+              <Text
+                className="ml-3 text-[28px] font-extrabold text-[#0B3D62]"
+                style={{
+                  textShadowColor: 'rgba(255,255,255,0.75)',
+                  textShadowRadius: 10,
+                  textShadowOffset: { width: 0, height: 1 },
+                }}
+              >
+                Notifications
+              </Text>
+            </View>
             <TouchableOpacity
               activeOpacity={0.8}
               className="h-10 w-10 items-center justify-center rounded-full border border-white/60 overflow-hidden"

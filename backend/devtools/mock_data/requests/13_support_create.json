@@ -1,0 +1,7 @@
+{
+  "type": "bug",
+  "subject": "Verification bug report",
+  "description": "Filed while checking POST /api/support/requests end to end.",
+  "app_version": "1.0.0",
+  "screen": "help-support"
+}
